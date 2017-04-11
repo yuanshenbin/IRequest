@@ -11,6 +11,9 @@ MVPHelper作者
 
 okhttputils作者(参考里面的链式写法)
 [https://github.com/hongyangAndroid/okhttputils](url)
+
+# 请求例子
+
         String mUrl = "http://image.baidu.com/channel/listjson?pn=" + 1
                 + "&rn=" + 22
                 + "&tag1=%E6%98%8E%E6%98%9F&tag2=%E5%85%A8%E9%83%A8";
