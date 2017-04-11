@@ -34,7 +34,7 @@ public class App extends Application {
 
 
         /**
-         * 调试模式 有可能会造成ui卡顿，比较要打印很长的json，正式包会自动关闭打印，所以可以无视
+         * 调试模式 有可能会造成ui卡顿，主要打印很长的json，正式包会自动关闭打印，所以可以无视
          */
         XLog.init(new LogConfiguration                                             // 如果没有指定 LogConfiguration，会默认使用 new LogConfiguration.Builder().build()
                 .Builder()                                               // 打印日志时会用到的配置
