@@ -44,7 +44,7 @@ version = "1.0.1"
 
 // 定义两个链接，下面会用到。
 def siteUrl = 'https://github.com/yuanshenbin/IRequest' // 项目主页。
-def gitUrl = 'git@github.com:yuanshenbin/IRequest.git' // Git仓库的url。
+def gitUrl = 'https://github.com/yuanshenbin/IRequest.git' // Git仓库的url。
 
 // 唯一包名，比如compile 'com.yanzhenjie:andserver:1.0.1'中的com.yanzhenjie就是这里配置的。
 group = "com.yuanshenbin"
@@ -70,8 +70,8 @@ install {
                 //填写开发者基本信息，复制我的，这里需要修改。
                 developers {
                     developer {
-                        id 'yuanshenbin' // 开发者的id。
-                        name 'yuanshenbin' // 开发者名字。
+                        id 'ysb' // 开发者的id。
+                        name 'xiaojiu' // 开发者名字。
                         email 'yuanshenbin@foxmail.com' // 开发者邮箱。
                     }
                 }
@@ -113,15 +113,14 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 bintray {
     user = properties.getProperty("bintray.user") // Bintray的用户名。
-    key = properties.getProperty("bintray.apikey") // Bintray刚才保存的ApiKey。
-
+      key = properties.getProperty("bintray.apikey") // Bintray刚才保存的ApiKey。
     configurations = ['archives']
     pkg {
         repo = "maven"  // 上传到maven库。（这里要特别注意，如果写了maven报404错误，请在bintray创建一个仓库，这里填改成你创建的仓库的名字，如何创建请看下图。）
         name = "IRequest"  // 发布到Bintray上的项目名字，这里的名字不是compile 'com.yanzhenjie:andserver:1.0.1'中的andserver。
-        userOrg = 'yuanshenbin@foxmail.com' // Bintray的用户名，2016年11月更新。
+        userOrg = 'xiaojiu' // Bintray的用户名，2016年11月更新。
         websiteUrl = siteUrl
-        vcsUrl = gitUrl
+        vcsUrl = gitUrl 
         licenses = ["Apache-2.0"]
         publish = true // 是否是公开项目。
     }
