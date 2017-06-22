@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="nohttp-1.1.3">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.yanzhenjie.nohttp/nohttp/1.1.3/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.yanzhenjie.nohttp/nohttp/1.1.3/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.yanzhenjie.nohttp/nohttp/1.1.3/fd4aca587e1dfbc68f3aee5c1414ec69aedb0f36/nohttp-1.1.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/IRequest.iml" filepath="$PROJECT_DIR$/IRequest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lib.http/lib.http.iml" filepath="$PROJECT_DIR$/lib.http/lib.http.iml" />
     </modules>
   </component>
 </project>

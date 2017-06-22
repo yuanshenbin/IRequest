@@ -9,6 +9,10 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+<<<<<<< HEAD
+=======
+            <option value="$PROJECT_DIR$/irequest" />
+>>>>>>> 3e98318240f0da140d7515cf17221f61fb3a3bec
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
