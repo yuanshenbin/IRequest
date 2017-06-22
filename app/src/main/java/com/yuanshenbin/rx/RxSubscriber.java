@@ -4,20 +4,17 @@ import android.content.Context;
 import android.widget.Toast;
 
 import com.elvishew.xlog.XLog;
+import com.yuanshenbin.network.IDialog;
 import com.yuanshenbin.widget.LoadingDialog;
 
 import java.io.IOException;
 
 import rx.Subscriber;
 
-/**
- * Author: Othershe
- * Time:  2016/8/11 17:45
- */
 public abstract class RxSubscriber<T> extends Subscriber<T> {
     private boolean isLoading;
     private Context mContext;
-    private LoadingDialog mDialog;
+    private IDialog mDialog;
 
     public RxSubscriber(Context context, boolean loading) {
         isLoading = loading;
@@ -37,7 +34,7 @@ public abstract class RxSubscriber<T> extends Subscriber<T> {
         } else {
             Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        XLog.e("rx",e);
+        XLog.e("rx", e);
 
         _onError();
 
@@ -60,13 +57,14 @@ public abstract class RxSubscriber<T> extends Subscriber<T> {
      */
     private void showLoading() {
         if (isLoading) {
-            mDialog = new LoadingDialog(mContext);
+            mDialog = new LoadingDialog();
+            mDialog.init(mContext);
             mDialog.show();
         }
     }
 
     private void cancelLoading() {
-        if (mDialog != null && mDialog.isShowing())
+        if (mDialog != null)
             mDialog.dismiss();
     }
 

@@ -2,7 +2,7 @@ package com.yuanshenbin.mvp.model;
 
 import com.yuanshenbin.bean.PuBuLiuModel;
 import com.yuanshenbin.mvp.contract.LoginContract;
-import com.yuanshenbin.nohttp.IRequestRx;
+import com.yuanshenbin.network.request.IRequestRx;
 
 import rx.Observable;
 
