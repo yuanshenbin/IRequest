@@ -18,7 +18,7 @@ public class UploadRequestRx extends BaseRequest<UploadRequestRx> {
         XLog.json(JsonUtils.string(this.mapParams));
     }
     public <T> Observable<T> execute(Class<T> classOfT) {
-        return RequestManager.createUploadArray(this, classOfT);
+        return RequestManager.upload(this, classOfT);
     }
 
 }

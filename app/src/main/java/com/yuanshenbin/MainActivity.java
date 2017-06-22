@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-        IRequest.upload(null, "")
+        IRequest.upload(this, "")
                 .execute(new AbstractResponseUpload<String>() {
                     @Override
                     public void onSuccess(String result) {

@@ -16,6 +16,8 @@ import com.yanzhenjie.nohttp.rest.OnResponseListener;
 import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
+import com.yanzhenjie.nohttp.rest.StringRequest;
+import com.yanzhenjie.nohttp.rest.SyncRequestExecutor;
 import com.yuanshenbin.bean.UploadFile;
 import com.yuanshenbin.network.AbstractResponseUpload;
 import com.yuanshenbin.network.IDialog;
@@ -130,7 +132,7 @@ public class RequestManager {
         request.addHeader("MEMBER_TOKEN", "d4016952efb53698d526b97e7518fb0e");
     }
 
-    public static <T> Observable<T> createUploadArray(final BaseRequest params, final Class<T> classOfT) {
+    public static <T> Observable<T> upload(final BaseRequest params, final Class<T> classOfT) {
         //放到线程池中，实现队列
         getQueue().submit(new RequestThreadQueue(params));
         return Observable.create(new Observable.OnSubscribe<T>() {
@@ -140,7 +142,7 @@ public class RequestManager {
                     while (params.isWait) {
 
                     }
-                    Request<String> request = NoHttp.createStringRequest(params.url, RequestMethod.POST);
+                    Request<String> request = new StringRequest(params.url, RequestMethod.POST);
                     request.setConnectTimeout(params.timeOut);
                     request.setRetryCount(params.retry);
                     SSLContext sslContext = SSLContextUtil.getDefaultSLLContext();
@@ -159,7 +161,7 @@ public class RequestManager {
                         request.add(file.getKey(), file.getFile());
                         request.add("", fileBinary);
                     }
-                    final Response<String> response = NoHttp.startRequestSync(request);
+                    final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
                     if (response.isSucceed()) {
                         String json = response.get();
                         XLog.json(json);
@@ -188,7 +190,8 @@ public class RequestManager {
                     while (params.isWait) {
 
                     }
-                    Request<T> request = (Request<T>) NoHttp.createStringRequest(params.url, params.requestMethod);
+
+                    Request<String> request = new StringRequest(params.url, params.requestMethod);
                     if (RequestMethod.POST == params.requestMethod) {
                         request.setDefineRequestBodyForJson(params.params);
                     }
@@ -200,13 +203,13 @@ public class RequestManager {
                     if (sslContext != null) {
                         request.setSSLSocketFactory(sslContext.getSocketFactory());
                     }
-                    final Response<T> response = NoHttp.startRequestSync(request);
 
+                    final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
                     if (response.isSucceed()) {
-                        String json = (String) response.get();
+                        String json = response.get();
                         XLog.json(json);
                         if (classOfT.equals(String.class)) {
-                            subscriber.onNext((T) json);
+                            subscriber.onNext((T) json); 
                         } else {
                             try {
                                 subscriber.onNext(JsonUtils.object(json, classOfT));
