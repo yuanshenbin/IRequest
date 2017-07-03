@@ -3,9 +3,9 @@ package com.yuanshenbin.network.request;
 
 import android.content.Context;
 
-import com.elvishew.xlog.XLog;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yuanshenbin.network.AbstractResponse;
+import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.util.StringUtils;
 
 
@@ -22,7 +22,7 @@ public class GetRequest extends BaseRequest<GetRequest> {
     public <T> void execute(AbstractResponse<T> l) {
         requestMethod(RequestMethod.GET);
         this.url = StringUtils.Joint(this.url, this.mapParams);
-        XLog.e(url);
+        ILogger.e(url);
         RequestManager.load(this, l);
     }
 }

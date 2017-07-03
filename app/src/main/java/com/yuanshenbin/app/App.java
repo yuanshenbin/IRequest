@@ -2,21 +2,15 @@ package com.yuanshenbin.app;
 
 import android.app.Application;
 
-import com.elvishew.xlog.LogConfiguration;
-import com.elvishew.xlog.LogLevel;
-import com.elvishew.xlog.XLog;
-import com.elvishew.xlog.printer.AndroidPrinter;
-import com.elvishew.xlog.printer.ConsolePrinter;
-import com.elvishew.xlog.printer.file.FilePrinter;
-import com.elvishew.xlog.printer.file.backup.NeverBackupStrategy;
-import com.elvishew.xlog.printer.file.naming.DateFileNameGenerator;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.FormatStrategy;
+import com.orhanobut.logger.PrettyFormatStrategy;
 import com.yanzhenjie.nohttp.InitializationConfig;
 import com.yanzhenjie.nohttp.Logger;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.OkHttpNetworkExecutor;
 import com.yanzhenjie.nohttp.cache.DBCacheStore;
 import com.yanzhenjie.nohttp.cookie.DBCookieStore;
-import com.yuanshenbin.BuildConfig;
 
 /**
  * Created by Jacky on 2016/10/31.
@@ -58,21 +52,14 @@ public class App extends Application {
 
         Logger.setDebug(true);
 
+        FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()
+                .showThreadInfo(false)  // (Optional) Whether to show thread info or not. Default true
+                .methodCount(0)         // (Optional) How many method line to show. Default 2
+                .methodOffset(7)        // (Optional) Hides internal method calls up to offset. Default 5
+                .tag("@@")   // (Optional) Global tag for every log. Default PRETTY_LOGGER
+                .build();
 
-        /**
-         * 调试模式 有可能会造成ui卡顿，主要打印很长的json，正式包会自动关闭打印，所以可以无视
-         */
-        XLog.init(new LogConfiguration                                             // 如果没有指定 LogConfiguration，会默认使用 new LogConfiguration.Builder().build()
-                .Builder()                                               // 打印日志时会用到的配置
-                .logLevel((BuildConfig.DEBUG ? LogLevel.ALL             // Specify log level, logs below this level won't be printed, default: LogLevel.ALL
-                        : LogLevel.NONE))
-                .tag("@@").b()                                     // 默认: "XLOG"
-                .build(), new AndroidPrinter(), new ConsolePrinter(), new FilePrinter                      // Printer that print the log to the file system
-                .Builder("/sdcard/xlog/")                              // Specify the path to save log file
-                .fileNameGenerator(new DateFileNameGenerator())        // Default: ChangelessFileNameGenerator("log")
-                .backupStrategy(new NeverBackupStrategy())             // Default: FileSizeBackupStrategy(1024 * 1024)
-
-                .build());
+        com.orhanobut.logger.Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy));
 
     }
 

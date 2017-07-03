@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.elvishew.xlog.XLog;
+import com.yuanshenbin.util.ILogger;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -84,7 +84,7 @@ public abstract class BaseFragment extends Fragment {
                 EventBus.getDefault().register(this);
             }catch ( Exception e)
             {
-                XLog.e(TAG,e);
+                ILogger.e(TAG,e);
             }
         }
         initDatas();
@@ -186,7 +186,7 @@ public abstract class BaseFragment extends Fragment {
                 EventBus.getDefault().unregister(this);
             }catch ( Exception e)
             {
-                XLog.e(TAG,e);
+                ILogger.e(TAG,e);
             }
         }
     }

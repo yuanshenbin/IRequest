@@ -2,11 +2,11 @@ package com.yuanshenbin.network.request;
 
 import android.text.TextUtils;
 
-import com.elvishew.xlog.XLog;
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.rest.RestRequest;
 import com.yanzhenjie.nohttp.rest.StringRequest;
+import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.util.JsonUtils;
 
 /**
@@ -25,10 +25,10 @@ public class ArrayRequest<T> extends RestRequest<T> {
     public T parseResponse(Headers responseHeaders, byte[] responseBody) throws Exception {
         String result = StringRequest.parseResponseString(responseHeaders, responseBody);
         if (TextUtils.isEmpty(result)) {
-            XLog.e("", new NullPointerException());
+            ILogger.e("", new NullPointerException());
             throw new NullPointerException();
         } else {
-            XLog.json(result);
+            ILogger.json(result);
             return JsonUtils.object(result, classOfT);
         }
     }

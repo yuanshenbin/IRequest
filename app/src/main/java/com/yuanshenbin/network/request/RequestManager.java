@@ -3,7 +3,6 @@ package com.yuanshenbin.network.request;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.elvishew.xlog.XLog;
 import com.yanzhenjie.nohttp.FileBinary;
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.NoHttp;
@@ -19,11 +18,12 @@ import com.yanzhenjie.nohttp.rest.Response;
 import com.yanzhenjie.nohttp.rest.StringRequest;
 import com.yanzhenjie.nohttp.rest.SyncRequestExecutor;
 import com.yuanshenbin.bean.UploadFile;
+import com.yuanshenbin.network.AbstractResponse;
 import com.yuanshenbin.network.AbstractResponseUpload;
 import com.yuanshenbin.network.IDialog;
-import com.yuanshenbin.network.AbstractResponse;
 import com.yuanshenbin.network.ResponseEnum;
 import com.yuanshenbin.network.SSLContextUtil;
+import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.util.JsonUtils;
 import com.yuanshenbin.widget.LoadingDialog;
 
@@ -164,7 +164,7 @@ public class RequestManager {
                     final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
                     if (response.isSucceed()) {
                         String json = response.get();
-                        XLog.json(json);
+                        ILogger.json(json);
                         subscriber.onNext(JsonUtils.object(json, classOfT));
                     } else {
                         subscriber.onError(response.getException());
@@ -207,7 +207,7 @@ public class RequestManager {
                     final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
                     if (response.isSucceed()) {
                         String json = response.get();
-                        XLog.json(json);
+                        ILogger.json(json);
                         if (classOfT.equals(String.class)) {
                             subscriber.onNext((T) json); 
                         } else {
@@ -222,7 +222,7 @@ public class RequestManager {
                     }
                 } catch (Exception e) {
                     subscriber.onError(e);
-                    XLog.d("", e);
+                    ILogger.d("", e);
                 }
                 params.isQueueEnd = true;
                 subscriber.onCompleted();
@@ -295,7 +295,7 @@ public class RequestManager {
                     l.onFailed();
                     l.onFailed(what, response);
                 }
-                XLog.d("", response.getException());
+                ILogger.d("", response.getException());
             }
 
             @Override
@@ -486,7 +486,7 @@ public class RequestManager {
                     l.onFailed();
                     l.onFailed(what, response);
                 }
-                XLog.d("", response.getException());
+                ILogger.d("", response.getException());
             }
 
             @Override

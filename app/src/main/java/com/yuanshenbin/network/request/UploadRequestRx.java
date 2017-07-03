@@ -1,6 +1,6 @@
 package com.yuanshenbin.network.request;
 
-import com.elvishew.xlog.XLog;
+import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.util.JsonUtils;
 
 import java.util.Map;
@@ -15,7 +15,7 @@ public class UploadRequestRx extends BaseRequest<UploadRequestRx> {
     public <T> UploadRequestRx(String url, T params) {
         this.url = url;
         this.mapParams = (Map<Object, Object>) params;
-        XLog.json(JsonUtils.string(this.mapParams));
+        ILogger.json(JsonUtils.string(this.mapParams));
     }
     public <T> Observable<T> execute(Class<T> classOfT) {
         return RequestManager.upload(this, classOfT);

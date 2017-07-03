@@ -3,8 +3,8 @@ package com.yuanshenbin.rx;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.elvishew.xlog.XLog;
 import com.yuanshenbin.network.IDialog;
+import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.widget.LoadingDialog;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ public abstract class RxSubscriber<T> extends Subscriber<T> {
         } else {
             Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        XLog.e("rx", e);
+        ILogger.e("rx", e);
 
         _onError();
 

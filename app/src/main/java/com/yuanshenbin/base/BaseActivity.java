@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
-import com.elvishew.xlog.XLog;
+import com.yuanshenbin.util.ILogger;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -78,7 +78,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             try {
                 EventBus.getDefault().register(this);
             } catch (Exception e) {
-                XLog.e(TAG,e);
+                ILogger.e(TAG,e);
             }
         }
         initDatas();
@@ -95,7 +95,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             try {
                 EventBus.getDefault().register(this);
             } catch (Exception e) {
-                XLog.e(TAG,e);
+                ILogger.e(TAG,e);
             }
         }
         initDatas();
@@ -218,7 +218,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             return res;
         } catch (Exception e) {
 
-            XLog.e(TAG,e);
+            ILogger.e(TAG,e);
             return super.getResources();
         }
     }
@@ -231,7 +231,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             try {
                 EventBus.getDefault().unregister(this);
             } catch (Exception e) {
-                XLog.e(TAG,e);
+                ILogger.e(TAG,e);
             }
         }
     }

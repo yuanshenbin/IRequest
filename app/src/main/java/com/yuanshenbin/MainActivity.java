@@ -9,6 +9,7 @@ import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.download.DownloadListener;
 import com.yuanshenbin.network.AbstractResponse;
 import com.yuanshenbin.network.AbstractResponseUpload;
+import com.yuanshenbin.network.ResponseEnum;
 import com.yuanshenbin.network.request.IRequest;
 
 import java.io.File;
@@ -19,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        
 
 
         /**
@@ -110,6 +113,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(String result) {
 
                     }
+
+                    @Override
+                    public void onResponseState(ResponseEnum result) {
+                    }
+
                 });
         IRequest.download(this, "")
                 .execute(new DownloadListener() {
@@ -138,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
+        
 //        IRequest.get(this, mUrl)
 //                .params("", "")
 //                .loading(true)

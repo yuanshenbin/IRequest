@@ -1,7 +1,7 @@
 package com.yuanshenbin.network.request;
 
-import com.elvishew.xlog.XLog;
 import com.yanzhenjie.nohttp.RequestMethod;
+import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.util.JsonUtils;
 
 import rx.Observable;
@@ -14,7 +14,7 @@ public class PostRequestRx extends BaseRequest<PostRequestRx> {
     public <T> PostRequestRx(String url) {
         this.url = url;
         this.params = JsonUtils.string(mapParams);
-        XLog.json(this.params);
+        ILogger.json(this.params);
     }
 
     public <T> Observable<T> execute(Class<T> classOfT) {

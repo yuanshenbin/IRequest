@@ -23,7 +23,7 @@ public abstract class AbstractResponse<T> {
     }
 
     public void onFailed(int what, Response<T> response) {
-        Toast.makeText(App.getInstance(), "网络不给力···", Toast.LENGTH_SHORT).show();
+     //
     }
 
     public void onResponseState(ResponseEnum result) {

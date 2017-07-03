@@ -1,7 +1,7 @@
 package com.yuanshenbin.network.request;
 
-import com.elvishew.xlog.XLog;
 import com.yanzhenjie.nohttp.RequestMethod;
+import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.util.StringUtils;
 
 import rx.Observable;
@@ -19,7 +19,7 @@ public class GetRequestRx extends BaseRequest<GetRequestRx> {
     public <T> Observable<T> execute(Class<T> classOfT) {
         requestMethod(RequestMethod.GET);
         this.url = StringUtils.Joint(this.url, this.mapParams);
-        XLog.e(url);
+        ILogger.e(url);
         return RequestManager.load(this, classOfT);
     }
 }
