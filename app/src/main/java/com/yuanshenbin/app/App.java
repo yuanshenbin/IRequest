@@ -22,7 +22,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+            //哈哈
         instance = this;
 
         InitializationConfig config = InitializationConfig.newBuilder(this)
