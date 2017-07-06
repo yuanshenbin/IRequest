@@ -34,8 +34,11 @@ import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLContext;
 
-import rx.Observable;
-import rx.Subscriber;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.annotations.NonNull;
 
 
 /**
@@ -135,9 +138,9 @@ public class RequestManager {
     public static <T> Observable<T> upload(final BaseRequest params, final Class<T> classOfT) {
         //放到线程池中，实现队列
         getQueue().submit(new RequestThreadQueue(params));
-        return Observable.create(new Observable.OnSubscribe<T>() {
+        return  Observable.create(new ObservableOnSubscribe<T>() {
             @Override
-            public void call(Subscriber<? super T> subscriber) {
+            public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
                 try {
                     while (params.isWait) {
 
@@ -165,17 +168,16 @@ public class RequestManager {
                     if (response.isSucceed()) {
                         String json = response.get();
                         ILogger.json(json);
-                        subscriber.onNext(JsonUtils.object(json, classOfT));
+                        e.onNext(JsonUtils.object(json, classOfT));
                     } else {
-                        subscriber.onError(response.getException());
+                        e.onError(response.getException());
                     }
-                } catch (Exception e) {
-                    subscriber.onError(e);
+                } catch (Exception exception) {
+                    e.onError(exception);
+                    ILogger.d("", exception);
                 }
                 params.isQueueEnd = true;
-                subscriber.onCompleted();
-
-
+                e.onComplete();
             }
         });
     }
@@ -183,9 +185,9 @@ public class RequestManager {
     public static <T> Observable<T> load(final BaseRequest params, final Class<T> classOfT) {
         //放到线程池中，实现队列
         getQueue().submit(new RequestThreadQueue(params));
-        return Observable.create(new Observable.OnSubscribe<T>() {
+        return  Observable.create(new ObservableOnSubscribe<T>() {
             @Override
-            public void call(Subscriber<? super T> subscriber) {
+            public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
                 try {
                     while (params.isWait) {
 
@@ -209,23 +211,19 @@ public class RequestManager {
                         String json = response.get();
                         ILogger.json(json);
                         if (classOfT.equals(String.class)) {
-                            subscriber.onNext((T) json); 
+                            e.onNext((T) json); 
                         } else {
-                            try {
-                                subscriber.onNext(JsonUtils.object(json, classOfT));
-                            } catch (Exception e) {
-                                subscriber.onError(e);
-                            }
+                            e.onNext(JsonUtils.object(json, classOfT));
                         }
                     } else {
-                        subscriber.onError(response.getException());
+                        e.onError(response.getException());
                     }
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                    ILogger.d("", e);
+                } catch (Exception exception) {
+                    e.onError(exception);
+                    ILogger.d("", exception);
                 }
                 params.isQueueEnd = true;
-                subscriber.onCompleted();
+                e.onComplete();
             }
         });
     }

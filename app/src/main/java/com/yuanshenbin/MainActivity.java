@@ -82,14 +82,6 @@ public class MainActivity extends AppCompatActivity {
         String mUrl = "http://image.baidu.com/channel/listjson?pn=" + 1
                 + "&rn=" + 22
                 + "&tag1=%E6%98%8E%E6%98%9F&tag2=%E5%85%A8%E9%83%A8";
-//
-//        IRequest.get(this, mUrl)
-//                .execute(new RequestListener<String>() {
-//                    @Override
-//                    public void onSuccess(String result) {
-//
-//                    }
-//                });
         IRequest.get(this, mUrl)
                 .params("", "")
                 .loading(true)
@@ -105,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(File result) {
 
+                    }
+
+                    @Override
+                    public void onResponseState(ResponseEnum result) {
                     }
                 });
         IRequest.upload(this, "")
@@ -146,33 +142,11 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-        
-//        IRequest.get(this, mUrl)
-//                .params("", "")
-//                .loading(true)
-//                .execute(new RequestListener<PuBuLiuModel>() {
-//                    @Override
-//                    public void onSuccess(PuBuLiuModel result) {
-//                        Toast.makeText(MainActivity.this, result.getStart_index() + "", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//        
-//        IRequest.upload(this,"")
-//                .execute(new UploadListener<Object>() {
-//                    @Override
-//                    public void onSuccess(Object  result) {
-//                        
-//                    }
-//
-//                    @Override
-//                    public void onProgress(int what, int progress) {
-//                        super.onProgress(what, progress);
-//                        
-//                    }
-//                });
         findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                
+                
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
             }
         });

@@ -6,7 +6,9 @@ import com.yuanshenbin.bean.PuBuLiuModel;
 import com.yuanshenbin.mvp.constant.MvpTag;
 import com.yuanshenbin.mvp.contract.LoginContract;
 import com.yuanshenbin.mvp.model.LoginModelImpl;
-import com.yuanshenbin.rx.RxSubscriber;
+import com.yuanshenbin.rx.NetObserver;
+
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by Jacky on 2017/03/17
@@ -24,16 +26,19 @@ public class LoginPresenterImpl extends BasePresenter<LoginContract.View> implem
 
     @Override
     public void getLogin1(String account, String pass) {
-
-        mSubscription = add(mModel.getLogin1(account, pass), new RxSubscriber<PuBuLiuModel>(mContext, true) {
+        append(mModel.getLogin1(account, pass), new NetObserver<PuBuLiuModel>(mContext, true) {
             @Override
-            protected void _onNext(PuBuLiuModel result) {
+            public void _onSubscribe(Disposable d) {
+                mDisposable.add(d);
+            }
 
+            @Override
+            public void _onNext(PuBuLiuModel result) {
                 mView.onLogin1(result);
             }
 
             @Override
-            protected void _onError() {
+            public void _onError(Throwable e) {
                 mView.onError(MvpTag.TAG1);
             }
         });
@@ -41,15 +46,19 @@ public class LoginPresenterImpl extends BasePresenter<LoginContract.View> implem
 
     @Override
     public void getRegister2(String account, String pass) {
-        mSubscription = add(mModel.getRegister2(account, pass), new RxSubscriber<PuBuLiuModel>(mContext, true) {
+        append(mModel.getRegister2(account, pass), new NetObserver<PuBuLiuModel>(mContext, true) {
             @Override
-            protected void _onNext(PuBuLiuModel result) {
+            public void _onSubscribe(Disposable d) {
+                mDisposable.add(d);
+            }
 
+            @Override
+            public void _onNext(PuBuLiuModel result) {
                 mView.onRegister2(result);
             }
 
             @Override
-            protected void _onError() {
+            public void _onError(Throwable e) {
                 mView.onError(MvpTag.TAG2);
             }
         });
@@ -57,15 +66,19 @@ public class LoginPresenterImpl extends BasePresenter<LoginContract.View> implem
 
     @Override
     public void getVerification3(String account, String pass) {
-        mSubscription = add(mModel.getVerification3(account, pass), new RxSubscriber<PuBuLiuModel>(mContext, true) {
+        append(mModel.getVerification3(account, pass), new NetObserver<PuBuLiuModel>(mContext, true) {
             @Override
-            protected void _onNext(PuBuLiuModel result) {
+            public void _onSubscribe(Disposable d) {
+                mDisposable.add(d);
+            }
 
+            @Override
+            public void _onNext(PuBuLiuModel result) {
                 mView.onVerification3(result);
             }
 
             @Override
-            protected void _onError() {
+            public void _onError(Throwable e) {
                 mView.onError(MvpTag.TAG3);
             }
         });

@@ -1,10 +1,9 @@
 package com.yuanshenbin.rx;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Jacky on 2017/3/27.
@@ -23,11 +22,10 @@ public class RxManager {
         private static final RxManager INSTANCE = new RxManager();
     }
 
-    public <T> Subscription add(Observable<T> observable, Subscriber<T> subscriber) {
-        return observable
+    public <T> void add(Observable<T> observable, Observer<T> observer) {
+        observable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(subscriber);
+                .subscribe(observer);
     }
-
 }

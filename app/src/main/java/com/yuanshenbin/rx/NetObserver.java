@@ -1,5 +1,6 @@
 package com.yuanshenbin.rx;
 
+
 import android.content.Context;
 import android.widget.Toast;
 
@@ -9,21 +10,33 @@ import com.yuanshenbin.widget.LoadingDialog;
 
 import java.io.IOException;
 
-import rx.Subscriber;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
-public abstract class RxSubscriber<T> extends Subscriber<T> {
+/**
+ * Created by yuanshenbin on 2017/7/6.
+ */
+
+public abstract class NetObserver<T> implements Observer<T> {
+
     private boolean isLoading;
     private Context mContext;
     private IDialog mDialog;
 
-    public RxSubscriber(Context context, boolean loading) {
+    public NetObserver(Context context, boolean loading) {
         isLoading = loading;
         this.mContext = context;
     }
 
     @Override
-    public void onCompleted() {
-        cancelLoading();
+    public void onSubscribe(Disposable d) {
+        _onSubscribe(d);
+        showLoading();
+    }
+
+    @Override
+    public void onNext(T t) {
+        _onNext(t);
     }
 
     @Override
@@ -36,20 +49,14 @@ public abstract class RxSubscriber<T> extends Subscriber<T> {
         }
         ILogger.e("rx", e);
 
-        _onError();
+        _onError(e);
 
         cancelLoading();
     }
 
     @Override
-    public void onNext(T t) {
-        _onNext(t);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        showLoading();
+    public void onComplete() {
+        cancelLoading();
     }
 
     /**
@@ -68,8 +75,10 @@ public abstract class RxSubscriber<T> extends Subscriber<T> {
             mDialog.dismiss();
     }
 
-    protected abstract void _onNext(T result);
+    public abstract void _onSubscribe(Disposable d);
 
-    protected abstract void _onError();
+    public abstract void _onNext(T result);
+
+    public abstract void _onError(Throwable e);
 
 }

@@ -2,11 +2,12 @@ package com.yuanshenbin.base;
 
 import android.content.Context;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 
 /**
  * Author: Othershe
@@ -14,24 +15,26 @@ import rx.schedulers.Schedulers;
  */
 public class BasePresenter<V> {
     public V mView;
-    protected Subscription mSubscription;
+    public CompositeDisposable mDisposable;
     public Context mContext;
 
     public void attach(V view, Context context) {
         mView = view;
         this.mContext = context;
+        mDisposable=  new CompositeDisposable();
     }
 
     public void detach() {
         mView = null;
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
+        if (mDisposable != null) {
+            mDisposable.clear();
         }
     }
-    public <T> Subscription add(Observable<T> observable, Subscriber<T> subscriber) {
-        return observable
+
+    public <T> void append(Observable<T> observable, Observer<T> observer) {
+        observable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(subscriber);
+                .subscribe(observer);
     }
 }

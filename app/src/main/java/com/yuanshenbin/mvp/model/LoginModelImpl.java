@@ -3,8 +3,7 @@ package com.yuanshenbin.mvp.model;
 import com.yuanshenbin.bean.PuBuLiuModel;
 import com.yuanshenbin.mvp.contract.LoginContract;
 import com.yuanshenbin.network.request.IRequestRx;
-
-import rx.Observable;
+import io.reactivex.Observable;
 
 /**
 * Created by Jacky on 2017/03/17

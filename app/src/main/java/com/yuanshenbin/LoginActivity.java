@@ -1,8 +1,9 @@
 package com.yuanshenbin;
 
+import android.view.View;
 import android.widget.Button;
 
-import com.jakewharton.rxbinding.view.RxView;
+import com.jakewharton.rxbinding2.view.RxView;
 import com.yuanshenbin.base.BaseMVPActivity;
 import com.yuanshenbin.bean.PuBuLiuModel;
 import com.yuanshenbin.mvp.constant.MvpTag;
@@ -10,13 +11,14 @@ import com.yuanshenbin.mvp.contract.LoginContract;
 import com.yuanshenbin.mvp.presenter.LoginPresenterImpl;
 
 import butterknife.BindView;
-import rx.functions.Action1;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by Jacky on 2016/12/12.
  */
 
-public class LoginActivity extends BaseMVPActivity<LoginContract.View, LoginPresenterImpl> implements LoginContract.View {
+public class LoginActivity extends BaseMVPActivity<LoginContract.View ,LoginPresenterImpl> implements LoginContract.View {
     @BindView(R.id.btn1)
     Button vBtn1;
     @BindView(R.id.btn2)
@@ -38,25 +40,42 @@ public class LoginActivity extends BaseMVPActivity<LoginContract.View, LoginPres
 
     @Override
     protected void initEvents() {
-        RxView.clicks(vBtn1).subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
 
+        RxView.clicks(vBtn1).subscribe(new Consumer<Object>() {
+            @Override
+            public void accept(@NonNull Object o) throws Exception {
                 mPresenter.getLogin1("", "");
             }
         });
-        RxView.clicks(vBtn2).subscribe(new Action1<Void>() {
+        
+        
+        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void call(Void aVoid) {
-                mPresenter.getRegister2("", "");
+            public void onClick(View v) {
+                
             }
         });
-        RxView.clicks(vBtn3).subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                mPresenter.getVerification3("", "");
-            }
-        });
+        
+        
+//        RxView.clicks(vBtn1).subscribe(new Action1<Void>() {
+//            @Override
+//            public void call(Void aVoid) {
+//
+//                mPresenter.getLogin1("", "");
+//            }
+//        });
+//        RxView.clicks(vBtn2).subscribe(new Action1<Void>() {
+//            @Override
+//            public void call(Void aVoid) {
+//                mPresenter.getRegister2("", "");
+//            }
+//        });
+//        RxView.clicks(vBtn3).subscribe(new Action1<Void>() {
+//            @Override
+//            public void call(Void aVoid) {
+//                mPresenter.getVerification3("", "");
+//            }
+//        });
     }
 
     @Override
@@ -97,5 +116,10 @@ public class LoginActivity extends BaseMVPActivity<LoginContract.View, LoginPres
     @Override
     public void onShowToast(String msg) {
         IShowToast(msg);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

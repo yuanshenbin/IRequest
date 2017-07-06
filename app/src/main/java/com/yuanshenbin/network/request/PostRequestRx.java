@@ -4,7 +4,8 @@ import com.yanzhenjie.nohttp.RequestMethod;
 import com.yuanshenbin.util.ILogger;
 import com.yuanshenbin.util.JsonUtils;
 
-import rx.Observable;
+import io.reactivex.Observable;
+
 
 /**
  * Created by Jacky on 2016/12/1.
