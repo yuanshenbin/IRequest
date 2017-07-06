@@ -1,6 +1,5 @@
 package com.yuanshenbin;
 
-import android.view.View;
 import android.widget.Button;
 
 import com.jakewharton.rxbinding2.view.RxView;
@@ -47,35 +46,18 @@ public class LoginActivity extends BaseMVPActivity<LoginContract.View ,LoginPres
                 mPresenter.getLogin1("", "");
             }
         });
-        
-        
-        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+        RxView.clicks(vBtn2).subscribe(new Consumer<Object>() {
             @Override
-            public void onClick(View v) {
-                
+            public void accept(@NonNull Object o) throws Exception {
+                mPresenter.getRegister2("", "");
             }
         });
-        
-        
-//        RxView.clicks(vBtn1).subscribe(new Action1<Void>() {
-//            @Override
-//            public void call(Void aVoid) {
-//
-//                mPresenter.getLogin1("", "");
-//            }
-//        });
-//        RxView.clicks(vBtn2).subscribe(new Action1<Void>() {
-//            @Override
-//            public void call(Void aVoid) {
-//                mPresenter.getRegister2("", "");
-//            }
-//        });
-//        RxView.clicks(vBtn3).subscribe(new Action1<Void>() {
-//            @Override
-//            public void call(Void aVoid) {
-//                mPresenter.getVerification3("", "");
-//            }
-//        });
+        RxView.clicks(vBtn3).subscribe(new Consumer<Object>() {
+            @Override
+            public void accept(@NonNull Object o) throws Exception {
+                mPresenter.getVerification3("", "");
+            }
+        });
     }
 
     @Override

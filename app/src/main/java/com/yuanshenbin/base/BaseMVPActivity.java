@@ -6,10 +6,6 @@ import android.support.annotation.Nullable;
 import com.yuanshenbin.util.StringUtils;
 
 
-/**
- * Author: Othershe
- * Time:  2016/8/11 17:53
- */
 public abstract class BaseMVPActivity<V, P extends BasePresenter<V>> extends BaseActivity {
     protected P mPresenter;
 

@@ -9,10 +9,6 @@ import android.view.ViewGroup;
 import com.yuanshenbin.util.StringUtils;
 
 
-/**
- * Author: Othershe
- * Time:  2016/8/11 17:53
- */
 public abstract class BaseMVPFragment<V, P extends BasePresenter<V>> extends BaseFragment {
 
     protected P mPresenter;

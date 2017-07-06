@@ -9,10 +9,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 
-/**
- * Author: Othershe
- * Time:  2016/8/11 17:53
- */
 public class BasePresenter<V> {
     public V mView;
     public CompositeDisposable mDisposable;
