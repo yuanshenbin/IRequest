@@ -19,7 +19,7 @@
             android:layout_centerInParent="true"
             android:orientation="vertical">
             <!-- 正在加载 -->
-            <com.yuanshenbin.widget.LoadingView
+            <com.ysb.widget.LoadingView
                 android:id="@+id/loading_bar"
                 android:layout_width="28dip"
                 android:layout_height="28dip"
