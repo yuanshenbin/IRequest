@@ -4,17 +4,19 @@ import android.text.TextUtils;
 
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.RequestMethod;
-import com.yanzhenjie.nohttp.rest.RestRequest;
+import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.StringRequest;
 import com.yuanshenbin.network.manager.NetworkManager;
-
 
 import java.lang.reflect.Type;
 
 /**
- * Created by Jacky on 2016/10/31.
+ * author : yuanshenbin
+ * time   : 2018/1/23
+ * desc   :
  */
-public class EntityRequest<T> extends RestRequest<T> {
+
+public class EntityRequest<T> extends Request<T> {
     private Type mType;
 
 

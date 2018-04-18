@@ -1,8 +1,8 @@
 package com.yuanshenbin.network.request;
 
+
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yuanshenbin.network.AdaptResponse;
-
 
 import io.reactivex.Observable;
 

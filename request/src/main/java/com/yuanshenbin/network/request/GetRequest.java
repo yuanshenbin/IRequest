@@ -2,10 +2,14 @@ package com.yuanshenbin.network.request;
 
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yuanshenbin.network.AbstractResponse;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
 
 
 /**
@@ -26,5 +30,6 @@ public class GetRequest extends BaseRequest<GetRequest> {
         }
         RequestManager.load(this, l);
     }
+
 
 }

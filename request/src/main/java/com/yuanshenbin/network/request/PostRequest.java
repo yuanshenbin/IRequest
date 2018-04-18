@@ -12,7 +12,6 @@ import com.yuanshenbin.network.manager.NetworkManager;
 public class PostRequest extends BaseRequest<PostRequest> {
 
 
-
     public <T> PostRequest(Context context, String url, T params) {
         this.url = url;
         this.context = context;
@@ -27,7 +26,7 @@ public class PostRequest extends BaseRequest<PostRequest> {
 
     public <T> void execute(AbstractResponse<T> l) {
         if (isPostMap) {
-            this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(params);
+            this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(this.mapParams);
         }
         requestMethod(RequestMethod.POST);
         RequestManager.load(this, l);

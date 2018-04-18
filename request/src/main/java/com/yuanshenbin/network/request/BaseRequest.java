@@ -98,8 +98,8 @@ public abstract class BaseRequest<T extends BaseRequest> {
     /**
      * 头部参数
      */
-    protected  Map<Object,Object> headerParam =new HashMap<>();
-
+    protected  Map<Object,Object> headerParam =new HashMap<>(); 
+    
 
 
     public T loading(boolean loading) {

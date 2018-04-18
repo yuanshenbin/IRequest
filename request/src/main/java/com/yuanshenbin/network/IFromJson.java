@@ -10,6 +10,6 @@ import java.lang.reflect.Type;
 
 public interface IFromJson {
 
-    <T> T onFromJson(String json, Type type);
+    <T> T onFromJson( String json,Type type);
     String onToJson(Object object);
 }

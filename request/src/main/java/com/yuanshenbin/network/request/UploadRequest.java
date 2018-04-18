@@ -3,8 +3,8 @@ package com.yuanshenbin.network.request;
 import android.content.Context;
 
 import com.yanzhenjie.nohttp.RequestMethod;
-import com.yuanshenbin.network.manager.NetworkManager;
 import com.yuanshenbin.network.AbstractUploadResponse;
+import com.yuanshenbin.network.manager.NetworkManager;
 
 
 /**

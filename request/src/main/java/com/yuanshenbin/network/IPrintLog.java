@@ -9,10 +9,9 @@ package com.yuanshenbin.network;
 public interface IPrintLog {
 
 
-
     void onPrintParam(Object object);
 
     void onPrintResult(Object object);
 
-    void  onPrintException(Exception e);
+    void onPrintException(Exception e);
 }

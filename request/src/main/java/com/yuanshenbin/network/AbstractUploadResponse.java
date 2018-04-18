@@ -2,27 +2,13 @@ package com.yuanshenbin.network;
 
 import com.yanzhenjie.nohttp.BasicBinary;
 import com.yanzhenjie.nohttp.FileBinary;
-import com.yuanshenbin.network.model.ResponseModel;
-import com.yuanshenbin.network.manager.NetworkManager;
-;
 
 /**
  * Created by Jacky on 2016/10/31.
  * 把回调接口设置抽象对象，不一定每个回调都是必须
  * 这样需要哪个回调 就自己实现出来
  */
-public abstract class AbstractUploadResponse<T> {
-
-    public abstract void onSuccess(T result);
-
-    public void onFailed() {
-
-        NetworkManager.getInstance().getInitializeConfig().getToastFailed().onFailed();
-    }
-
-    public void onResponseState(ResponseModel result) {
-
-    }
+public abstract class AbstractUploadResponse<T>  extends  AbstractResponse<T>{
 
 
     //======================下面是文件的回调======================

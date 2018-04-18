@@ -1,7 +1,8 @@
 package com.yuanshenbin.network.request;
 
-import com.yuanshenbin.network.manager.NetworkManager;
+
 import com.yuanshenbin.network.AdaptResponse;
+import com.yuanshenbin.network.manager.NetworkManager;
 
 import io.reactivex.Observable;
 
@@ -9,6 +10,7 @@ import io.reactivex.Observable;
 /**
  * Created by Jacky on 2017/2/4.
  */
+
 public class UploadRequestRx extends BaseRequest<UploadRequestRx> {
     public <T> UploadRequestRx(String url) {
         this.url = url;

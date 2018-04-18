@@ -21,15 +21,15 @@ import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 import com.yanzhenjie.nohttp.rest.StringRequest;
 import com.yanzhenjie.nohttp.rest.SyncRequestExecutor;
-import com.yuanshenbin.network.model.ResponseModel;
-import com.yuanshenbin.network.model.UploadFile;
-import com.yuanshenbin.network.manager.NetworkManager;
 import com.yuanshenbin.network.AbstractResponse;
 import com.yuanshenbin.network.AbstractUploadResponse;
 import com.yuanshenbin.network.AdaptResponse;
 import com.yuanshenbin.network.INetDialog;
 import com.yuanshenbin.network.NetworkConfig;
 import com.yuanshenbin.network.ResponseEnum;
+import com.yuanshenbin.network.manager.NetworkManager;
+import com.yuanshenbin.network.model.ResponseModel;
+import com.yuanshenbin.network.model.UploadFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,7 +43,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.annotations.NonNull;
-
 
 
 /**
@@ -234,7 +233,7 @@ public class RequestManager {
         Type type = ((ParameterizedType) l.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         final Request<T> request;
         if (type == String.class) {
-            request = (Request<T>) NoHttp.createStringRequest(params.url, params.requestMethod);
+            request = (Request<T>) new com.yuanshenbin.network.request.StringRequest(params.url, params.requestMethod);
         } else {
             request = new EntityRequest<>(params.url, params.requestMethod, type);
         }
@@ -297,7 +296,7 @@ public class RequestManager {
             public void onFailed(int what, Response<T> response) {
                 if (l != null) {
                     l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException()));
-                    l.onFailed();
+                    l.onFailed(response.getException());
                 }
                 if (networkConfig.getIDevelopMode() != null) {
                     networkConfig.getIDevelopMode().onRecord(params, response.get());
@@ -394,7 +393,7 @@ public class RequestManager {
         Type type = ((ParameterizedType) l.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         final Request<T> request;
         if (type == String.class) {
-            request = (Request<T>) NoHttp.createStringRequest(params.url, params.requestMethod);
+            request = (Request<T>) new com.yuanshenbin.network.request.StringRequest(params.url, params.requestMethod);
         } else {
             request = new EntityRequest<>(params.url, params.requestMethod, type);
         }
@@ -512,7 +511,7 @@ public class RequestManager {
             public void onFailed(int what, Response<T> response) {
                 if (l != null) {
                     l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException()));
-                    l.onFailed();
+                    l.onFailed(response.getException());
                 }
 
                 if (networkConfig.getIDevelopMode() != null) {
