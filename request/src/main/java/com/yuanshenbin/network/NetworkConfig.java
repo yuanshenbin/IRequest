@@ -1,5 +1,6 @@
 package com.yuanshenbin.network;
 
+import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.InitializationConfig;
 import com.yanzhenjie.nohttp.NoHttp;
 
@@ -21,6 +22,12 @@ public class NetworkConfig {
     private SSLContext mSSLContext;
     private INetworkLinstener mINetworkLinstener;
     private IHeader mIHeader;
+    private IContentType mIContentType =new IContentType() {
+        @Override
+        public String getContentType() {
+            return Headers.HEAD_VALUE_CONTENT_TYPE_JSON;
+        }
+    };
     private int mThreadPoolSize = 5;
 
     public NetworkConfig(final Builder builder) {
@@ -38,6 +45,7 @@ public class NetworkConfig {
         mINetworkLinstener = builder.mNetworkLinstener;
         mThreadPoolSize = builder.mThreadPoolSize;
         mIHeader = builder.mHeader;
+        mIContentType = builder.mContentType;
     }
 
     public static final class Builder {
@@ -93,6 +101,13 @@ public class NetworkConfig {
          */
         private int mThreadPoolSize = 5;
 
+        private IContentType mContentType = new IContentType() {
+            @Override
+            public String getContentType() {
+                return Headers.HEAD_VALUE_CONTENT_TYPE_JSON;
+            }
+        };
+
 
         public Builder dialog(INetDialog dialog) {
             this.mDialog = dialog;
@@ -145,6 +160,12 @@ public class NetworkConfig {
         }
 
 
+        public Builder contentType(IContentType contentType) {
+            this.mContentType = contentType;
+            return this;
+        }
+
+
         public NetworkConfig build() {
             return new NetworkConfig(this);
         }
@@ -185,5 +206,9 @@ public class NetworkConfig {
 
     public int getThreadPoolSize() {
         return mThreadPoolSize;
+    }
+
+    public String getContentType() {
+        return mIContentType.getContentType();
     }
 }

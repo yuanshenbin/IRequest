@@ -45,4 +45,5 @@ public interface INetDialog {
      * @param msg
      */
     void setMessage(String... msg);
+
 }

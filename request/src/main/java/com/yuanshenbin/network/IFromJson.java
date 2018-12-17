@@ -1,6 +1,7 @@
 package com.yuanshenbin.network;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * author : yuanshenbin
@@ -10,6 +11,9 @@ import java.lang.reflect.Type;
 
 public interface IFromJson {
 
-    <T> T onFromJson( String json,Type type);
+    <T> T onFromJson(String json, Type type);
+
     String onToJson(Object object);
+
+    Map<String,Object>  onJsonToMap(Object param);
 }

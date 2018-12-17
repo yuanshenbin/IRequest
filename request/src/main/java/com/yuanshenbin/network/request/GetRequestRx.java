@@ -22,6 +22,6 @@ public class GetRequestRx extends BaseRequest<GetRequestRx> {
         if (this.mapParams.size() != 0) {
             this.url = Joint(this.url, this.mapParams);
         }
-        return RequestManager.load(this, l);
+        return RequestManager.getInstance().load(this, l);
     }
 }

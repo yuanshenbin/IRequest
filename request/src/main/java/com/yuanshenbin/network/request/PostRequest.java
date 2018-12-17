@@ -12,10 +12,11 @@ import com.yuanshenbin.network.manager.NetworkManager;
 public class PostRequest extends BaseRequest<PostRequest> {
 
 
-    public <T> PostRequest(Context context, String url, T params) {
+    public <T> PostRequest(Context context, String url, T param) {
         this.url = url;
         this.context = context;
-        this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(params);
+        this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(param);
+
     }
 
     public <T> PostRequest(Context context, String url) {
@@ -29,6 +30,6 @@ public class PostRequest extends BaseRequest<PostRequest> {
             this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(this.mapParams);
         }
         requestMethod(RequestMethod.POST);
-        RequestManager.load(this, l);
+        RequestManager.getInstance().load(this, l);
     }
 }

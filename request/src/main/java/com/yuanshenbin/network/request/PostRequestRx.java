@@ -18,16 +18,16 @@ public class PostRequestRx extends BaseRequest<PostRequestRx> {
         this.isPostMap = true;
     }
 
-    public <T> PostRequestRx(String url, T patam) {
+    public <T> PostRequestRx(String url, T param) {
         this.url = url;
-        this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(patam);
+        this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(param);
     }
 
     public <T> Observable<T> execute(AdaptResponse<T> l) {
         if (isPostMap) {
-            this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(mapParams);
+            this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(this.mapParams);
         }
         requestMethod(RequestMethod.POST);
-        return RequestManager.load(this, l);
+        return RequestManager.getInstance().load(this, l);
     }
 }

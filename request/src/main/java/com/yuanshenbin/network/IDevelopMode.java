@@ -1,6 +1,7 @@
 package com.yuanshenbin.network;
 
-import com.yuanshenbin.network.request.BaseRequest;
+
+import com.yuanshenbin.network.model.RecordModel;
 
 /**
  * author : yuanshenbin
@@ -10,5 +11,5 @@ import com.yuanshenbin.network.request.BaseRequest;
 
 public interface IDevelopMode {
 
-    void  onRecord( BaseRequest params,Object response);
+    void onRecord(RecordModel record);
 }

@@ -48,6 +48,11 @@ public class UploadFile implements Serializable {
         this.key = key;
     }
 
+    public UploadFile(String key,Object mode) {
+        this.mode = mode;
+        this.key = key;
+    }
+
     public int getWhat() {
         return what;
     }

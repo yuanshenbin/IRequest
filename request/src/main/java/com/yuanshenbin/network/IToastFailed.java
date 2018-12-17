@@ -8,5 +8,5 @@ package com.yuanshenbin.network;
 
 public interface IToastFailed {
 
-    void  onFailed();
+    void  onFailed(Exception e);
 }

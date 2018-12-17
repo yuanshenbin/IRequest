@@ -4,7 +4,7 @@ import com.yanzhenjie.nohttp.BasicBinary;
 import com.yanzhenjie.nohttp.FileBinary;
 
 /**
- * Created by Jacky on 2016/10/31.
+ * Created by yuanshenbin on 2016/10/31.
  * 把回调接口设置抽象对象，不一定每个回调都是必须
  * 这样需要哪个回调 就自己实现出来
  */

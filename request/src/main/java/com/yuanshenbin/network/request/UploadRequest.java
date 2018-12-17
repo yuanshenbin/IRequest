@@ -8,13 +8,13 @@ import com.yuanshenbin.network.manager.NetworkManager;
 
 
 /**
- * Created by Jacky on 2016/10/31.
+ * Created by yuanshenbin on 2016/10/31.
  */
 public class UploadRequest extends BaseRequest<UploadRequest> {
-    public <T> UploadRequest(Context context, String url, T params) {
+    public <T> UploadRequest(Context context, String url, T param) {
         this.url = url;
         this.context = context;
-        this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(params);
+        this.mapParams = NetworkManager.getInstance().getInitializeConfig().getFromJson().onJsonToMap(param);
     }
 
     public <T> UploadRequest(Context context, String url) {
@@ -24,10 +24,7 @@ public class UploadRequest extends BaseRequest<UploadRequest> {
     }
 
     public <T> void execute(AbstractUploadResponse<T> l) {
-        if (isPostMap) {
-            this.params = NetworkManager.getInstance().getInitializeConfig().getFromJson().onToJson(mapParams);
-        }
         requestMethod(RequestMethod.POST);
-        RequestManager.upload(this, l);
+        RequestManager.getInstance().upload(this, l);
     }
 }

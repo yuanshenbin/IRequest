@@ -20,14 +20,15 @@ import java.util.Map;
  * Created by Jacky on 2016/10/31.
  */
 public abstract class BaseRequest<T extends BaseRequest> {
+
     /**
      * 地址
      */
-    protected String url;
+    public String url;
     /**
      * 上下文
      */
-    protected Context context;
+    public Context context;
     /**
      * 是否显示loading
      */
@@ -42,9 +43,9 @@ public abstract class BaseRequest<T extends BaseRequest> {
      * 如果传的是map或者对象其他
      * 把这个参数改下就行，哪里需要了这个参数，同时也改掉
      */
-    protected String params;
+    public String params = "";
 
-    protected Map<Object, Object> mapParams = new HashMap<>();
+    public Map<String, Object> mapParams = new HashMap<>();
 
     /**
      * 超时时间
@@ -83,7 +84,6 @@ public abstract class BaseRequest<T extends BaseRequest> {
 
     protected boolean isPostMap = false;
 
-
     /**
      * 缓存
      */
@@ -92,14 +92,25 @@ public abstract class BaseRequest<T extends BaseRequest> {
     /**
      * 是否禁止手动关闭对话框
      */
-    protected boolean isCloseDialog =true;
+    protected boolean isCloseDialog = true;
 
 
     /**
      * 头部参数
      */
-    protected  Map<Object,Object> headerParam =new HashMap<>(); 
-    
+    public Map<Object, Object> headerParam = new HashMap<>();
+
+
+    /***
+     * 文件上传的key
+     */
+    protected String fileKey = "file";
+
+
+    /**
+     * 请求类型
+     */
+    protected  String contentType;
 
 
     public T loading(boolean loading) {
@@ -143,7 +154,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
     }
 
     public T isDeleteOld(boolean isDeleteOld) {
-        this.isDeleteOld = isRange;
+        this.isDeleteOld = isDeleteOld;
         return (T) this;
     }
 
@@ -156,21 +167,24 @@ public abstract class BaseRequest<T extends BaseRequest> {
         this.uploadFiles = uploadFiles;
         return (T) this;
     }
+
     public T uploadFile(UploadFile uploadFile) {
-        if(uploadFile.getMode()!=null)
-        {
+        if (uploadFile.getMode() != null) {
             this.uploadFiles.add(uploadFile);
         }
         return (T) this;
     }
+
     public T params(String key, Object value) {
         mapParams.put(key, value);
         return (T) this;
     }
-    public T params(Map<Object, Object>  maps) {
+
+    public T params(Map<String, Object> maps) {
         mapParams.putAll(maps);
         return (T) this;
     }
+
     public T cacheMode(CacheMode cacheMode) {
         this.cacheMode = cacheMode;
         return (T) this;
@@ -184,6 +198,15 @@ public abstract class BaseRequest<T extends BaseRequest> {
 
     public T headerParam(String key, String value) {
         headerParam.put(key, value);
+        return (T) this;
+    }
+
+    public T fileKey(String fileKey) {
+        this.fileKey = fileKey;
+        return (T) this;
+    }
+    public T contentType(String contentType) {
+        this.contentType = contentType;
         return (T) this;
     }
 
@@ -212,7 +235,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
             return false;
     }
 
-    protected String Joint(String url, Map<Object, Object> params) {
+    protected String Joint(String url, Map<String, Object> params) {
         if (url.indexOf("?") < 0) {
             url += "?";
         }

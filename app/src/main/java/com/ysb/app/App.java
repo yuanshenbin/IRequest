@@ -2,24 +2,23 @@ package com.ysb.app;
 
 import android.app.Application;
 
+import com.google.gson.Gson;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.PrettyFormatStrategy;
+import com.squareup.leakcanary.LeakCanary;
 import com.yanzhenjie.nohttp.InitializationConfig;
 import com.yanzhenjie.nohttp.Logger;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.OkHttpNetworkExecutor;
 import com.yanzhenjie.nohttp.cache.DBCacheStore;
 import com.yanzhenjie.nohttp.cookie.DBCookieStore;
-import com.ysb.network.DevelopModeImpl;
-import com.ysb.network.FromJsonImpl;
-import com.ysb.network.NetDialogImpl;
-import com.ysb.network.NetworkImplLinstener;
-import com.ysb.network.PrintLogImpl;
-import com.ysb.network.ToastFailedImpl;
-import com.ysb.network.TokenInterceptor;
+import com.yuanshenbin.network.IFromJson;
 import com.yuanshenbin.network.NetworkConfig;
 import com.yuanshenbin.network.manager.NetworkManager;
+
+import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * Created by Jacky on 2016/10/31.
@@ -32,7 +31,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = this;
-
+        LeakCanary.install(this);
         InitializationConfig config = InitializationConfig.newBuilder(mContext)
                 // 全局连接服务器超时时间，单位毫秒，默认10s。
                 .connectionTimeout(30 * 1000)
@@ -50,7 +49,6 @@ public class App extends Application {
                 )
                 // 配置网络层，默认URLConnectionNetworkExecutor，如果想用OkHttp：OkHttpNetworkExecutor。
                 .networkExecutor(new OkHttpNetworkExecutor())
-                .interceptor(new TokenInterceptor())
                 // 全局通用Header，add是添加，多次调用add不会覆盖上次add。
                 // 全局通用Param，add是添加，多次调用add不会覆盖上次add。
                 .retry(0) // 全局重试次数，配置后每个请求失败都会重试x次。
@@ -60,13 +58,24 @@ public class App extends Application {
 
         NetworkManager.getInstance().
                 InitializationConfig(new NetworkConfig.Builder()
-                        .fromJson(new FromJsonImpl())
-                        .developMode(new DevelopModeImpl())
-                        .dialog(new NetDialogImpl())
-                        .printLog(new PrintLogImpl())
+                        .fromJson(new IFromJson() {
+                            @Override
+                            public <T> T onFromJson(String json, Type type) {
+                                return new Gson().fromJson(json,type);
+                            }
+
+                            @Override
+                            public String onToJson(Object object) {
+                                return new Gson().toJson(object);
+                            }
+
+                            @Override
+                            public Map<String, Object> onJsonToMap(Object param) {
+                                return null;
+                            }
+                        })
                         .noHttpConfig(config)
-                        .toastFailed(new ToastFailedImpl())
-                        .networkLinstener(new NetworkImplLinstener())
+
                         .build());
 
         Logger.setDebug(true);
