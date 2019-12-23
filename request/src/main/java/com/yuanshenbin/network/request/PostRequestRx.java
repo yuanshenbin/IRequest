@@ -9,7 +9,7 @@ import io.reactivex.Observable;
 
 
 /**
- * Created by Jacky on 2016/12/1.
+ * Created by yuanshenbin on 2016/12/1.
  */
 public class PostRequestRx extends BaseRequest<PostRequestRx> {
 

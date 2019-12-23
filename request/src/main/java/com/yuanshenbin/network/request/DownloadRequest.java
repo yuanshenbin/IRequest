@@ -8,7 +8,7 @@ import com.yanzhenjie.nohttp.download.DownloadListener;
 /**
  * Created by yuanshenbin on 2016/10/31.
  */
-public class DownloadRequest extends BaseRequest<DownloadRequest> {
+public class DownloadRequest extends FileRequest<DownloadRequest> {
     public DownloadRequest(Context context, String url) {
         this.url = url;
         this.context = context;

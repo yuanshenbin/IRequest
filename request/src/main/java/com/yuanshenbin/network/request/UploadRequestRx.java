@@ -11,7 +11,7 @@ import io.reactivex.Observable;
  * Created by yuanshenbin on 2017/2/4.
  */
 
-public class UploadRequestRx extends BaseRequest<UploadRequestRx> {
+public class UploadRequestRx extends FileRequest<UploadRequestRx> {
     public <T> UploadRequestRx(String url) {
         this.url = url;
         this.isPostMap = true;

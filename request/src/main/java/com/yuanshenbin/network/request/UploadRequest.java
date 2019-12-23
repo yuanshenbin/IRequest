@@ -10,7 +10,7 @@ import com.yuanshenbin.network.manager.NetworkManager;
 /**
  * Created by yuanshenbin on 2016/10/31.
  */
-public class UploadRequest extends BaseRequest<UploadRequest> {
+public class UploadRequest extends FileRequest<UploadRequest> {
     public <T> UploadRequest(Context context, String url, T param) {
         this.url = url;
         this.context = context;

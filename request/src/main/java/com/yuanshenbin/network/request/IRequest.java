@@ -5,7 +5,7 @@ import android.content.Context;
 
 
 /**
- * Created by Jacky on 2016/10/31.
+ * Created by yuanshenbin on 2016/10/31.
  */
 public class IRequest {
 

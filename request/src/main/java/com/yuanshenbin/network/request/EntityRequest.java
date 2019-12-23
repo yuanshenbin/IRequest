@@ -1,5 +1,7 @@
 package com.yuanshenbin.network.request;
 
+import com.facebook.network.connectionclass.ConnectionClassManager;
+import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.rest.Request;
@@ -12,7 +14,7 @@ import com.yuanshenbin.network.model.RecordModel;
 import java.lang.reflect.Type;
 
 /**
- * author : yuanshenbin
+ * author : yijiupi
  * time   : 2018/1/23
  * desc   :
  */
@@ -28,6 +30,7 @@ public class EntityRequest<T> extends Request<T> {
         this.mType = type;
         this.url = url;
         this.start = System.currentTimeMillis();
+        DeviceBandwidthSampler.getInstance().startSampling();
 
     }
 
@@ -41,12 +44,14 @@ public class EntityRequest<T> extends Request<T> {
         if (NetworkManager.getInstance().getInitializeConfig().getIPrintLog() != null) {
             NetworkManager.getInstance().getInitializeConfig().getIPrintLog().onPrintResult(result);
         }
+        DeviceBandwidthSampler.getInstance().stopSampling();
         int resCode = responseHeaders.getResponseCode();
         if (resCode >= 200 && resCode < 300) { // Http层成功，这里只可能业务逻辑错误。
             try {
                 if (NetworkManager.getInstance().getInitializeConfig().getIDevelopMode() != null) {
-                    NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(url, param, result));
-                    NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(url, param, result, System.currentTimeMillis() - start));
+                    String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
+                    double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+                    NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(url, param, result, System.currentTimeMillis() - start,connectionQuality,downloadKBitsPerSecond));
                 }
                 T data = NetworkManager.getInstance().getInitializeConfig().getFromJson().onFromJson(result, mType);
                 return data;

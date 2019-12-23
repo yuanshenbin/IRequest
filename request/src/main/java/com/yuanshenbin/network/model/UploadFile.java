@@ -3,7 +3,7 @@ package com.yuanshenbin.network.model;
 import java.io.Serializable;
 
 /**
- * Created by Jacky on 2016/7/4.
+ * Created by yuanshenbin on 2016/7/4.
  * 上传需要的参数
  */
 

@@ -10,11 +10,20 @@ import java.io.Serializable;
 
 public class RecordModel implements Serializable {
 
+    private  Exception exception;
     private  String url;
     private String param;
     private  String result;
     private  long  requestTime;
+    /**
+     * 链接质量
+     */
+    private String connectionQuality;
 
+    /**
+     * 每秒流量值
+     */
+    private  double KBitsPerSecond;
     public RecordModel() {
     }
 
@@ -23,12 +32,45 @@ public class RecordModel implements Serializable {
         this.param = param;
         this.result = result;
     }
-
+    public RecordModel(String url, String param, String result, String connectionQuality, double KBitsPerSecond) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.connectionQuality = connectionQuality;
+        this.KBitsPerSecond = KBitsPerSecond;
+    }
+    public RecordModel(String url, String param, String result, String connectionQuality, double KBitsPerSecond,Exception e) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.connectionQuality = connectionQuality;
+        this.KBitsPerSecond = KBitsPerSecond;
+        this.exception=e;
+    }
     public RecordModel(String url, String param, String result, long requestTime) {
         this.url = url;
         this.param = param;
         this.result = result;
         this.requestTime = requestTime;
+    }
+
+    public RecordModel(String url, String param, String result, long requestTime, String connectionQuality, double KBitsPerSecond) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.requestTime = requestTime;
+        this.connectionQuality = connectionQuality;
+        this.KBitsPerSecond = KBitsPerSecond;
+    }
+
+    public RecordModel(String url, String param, String result, long requestTime, String connectionQuality, double KBitsPerSecond,Exception e) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.requestTime = requestTime;
+        this.connectionQuality = connectionQuality;
+        this.KBitsPerSecond = KBitsPerSecond;
+        this.exception=e;
     }
 
     public long getRequestTime() {
@@ -63,6 +105,31 @@ public class RecordModel implements Serializable {
         this.result = result;
     }
 
+
+    public String getConnectionQuality() {
+        return connectionQuality;
+    }
+
+    public void setConnectionQuality(String connectionQuality) {
+        this.connectionQuality = connectionQuality;
+    }
+
+    public double getKBitsPerSecond() {
+        return KBitsPerSecond;
+    }
+
+    public void setKBitsPerSecond(double KBitsPerSecond) {
+        this.KBitsPerSecond = KBitsPerSecond;
+    }
+
+
+    public Exception getException() {
+        return exception;
+    }
+
+    public void setException(Exception exception) {
+        this.exception = exception;
+    }
 
     @Override
     public String toString() {

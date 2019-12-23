@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
+import com.facebook.network.connectionclass.ConnectionClassManager;
+import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.yanzhenjie.nohttp.BasicBinary;
 import com.yanzhenjie.nohttp.BitmapBinary;
 import com.yanzhenjie.nohttp.FileBinary;
@@ -54,7 +56,7 @@ import io.reactivex.annotations.NonNull;
 
 
 /**
- * Created by Jacky on 2016/10/31.
+ * Created by yuanshenbin on 2016/10/31.
  */
 public class RequestManager {
 
@@ -87,7 +89,9 @@ public class RequestManager {
      * @return
      */
     public RequestQueue getRequestQueue() {
-        mRequestQueue = NoHttp.newRequestQueue(NetworkManager.getInstance().getInitializeConfig().getThreadPoolSize());
+        if (mRequestQueue == null) {
+            mRequestQueue = NoHttp.newRequestQueue(NetworkManager.getInstance().getInitializeConfig().getThreadPoolSize());
+        }
         return mRequestQueue;
     }
 
@@ -97,18 +101,20 @@ public class RequestManager {
      * @return
      */
     public DownloadQueue getDownloadQueue() {
-        mDownloadQueue = NoHttp.newDownloadQueue(NetworkManager.getInstance().getInitializeConfig().getThreadPoolSize());
+        if (mDownloadQueue == null) {
+            mDownloadQueue = NoHttp.newDownloadQueue(NetworkManager.getInstance().getInitializeConfig().getThreadPoolSize());
+        }
         return mDownloadQueue;
     }
 
 
-    public <T> Observable<T> upload(final BaseRequest params, final AdaptResponse<T> l) {
+    public <T> Observable<T> upload(final FileRequest params, final AdaptResponse<T> l) {
         return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
                 NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
                 try {
-                    Request<String> request = new com.yuanshenbin.network.request.StringRequest(params.url, RequestMethod.POST);
+                    StringRequest request = new StringRequest(params.url, RequestMethod.POST);
                     request.setConnectTimeout(params.timeOut);
                     request.setRetryCount(params.retry);
                     if (networkConfig.getHeader() != null) {
@@ -131,12 +137,12 @@ public class RequestManager {
                     for (UploadFile file : files) {
                         BasicBinary basicBinary = null;
                         if (file.getMode() instanceof File) {
-                            basicBinary = new FileBinary((File) file.getMode(), file.getKey());
+                            basicBinary = new FileBinary((File) file.getMode(), file.getKey(),params.mimeType);
                         } else if (file.getMode() instanceof Bitmap) {
-                            basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey());
+                            basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey(),params.mimeType);
 
                         } else if (file.getMode() instanceof FileInputStream) {
-                            basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey());
+                            basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey(),params.mimeType);
                         }
                         request.add(params.fileKey, basicBinary);
                     }
@@ -146,7 +152,6 @@ public class RequestManager {
                                 params.mapParams);
                     }
 
-                    long start = System.currentTimeMillis();
                     final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
                     if (response.isSucceed()) {
                         String json = response.get();
@@ -184,15 +189,17 @@ public class RequestManager {
                         } else if (exception instanceof ResultError) {
                             stringRes = exception.getMessage();
                         }
-
+                        DeviceBandwidthSampler.getInstance().stopSampling();
+                        if (NetworkManager.getInstance().getInitializeConfig().getIDevelopMode() != null) {
+                            String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
+                            double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+                            NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(params.url, request.getParam(), "", System.currentTimeMillis() - request.getStart(), connectionQuality, downloadKBitsPerSecond,exception));
+                        }
                         e.onError(new ResultError(stringRes, exception));
                         if (networkConfig.getIPrintLog() != null) {
                             networkConfig.getIPrintLog().onPrintException(new Exception(stringRes, exception));
                         }
-                    }
-                    if (networkConfig.getIDevelopMode() != null) {
 
-                        networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.mapParams.toString(), response.get(), Math.abs(System.currentTimeMillis() - start)));
                     }
 
 
@@ -214,12 +221,19 @@ public class RequestManager {
             public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
                 NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
                 try {
-                    Request<String> request = new com.yuanshenbin.network.request.StringRequest(params.url, params.requestMethod);
+                    StringRequest request = new StringRequest(params.url, params.requestMethod);
 
                     if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
                         postConversion(networkConfig, params, request);
                     }
-                    request.setContentType(networkConfig.getContentType());
+
+
+                    if(params.contentType != null &&params.contentType.toString().trim().length() != 0)
+                    {
+                        request.setContentType(params.contentType);
+                    }else {
+                        request.setContentType(networkConfig.getContentType());
+                    }
                     request.setCacheKey(params.url);
                     request.setCacheMode(params.cacheMode);
                     request.setConnectTimeout(params.timeOut);
@@ -228,6 +242,10 @@ public class RequestManager {
                     if (networkConfig.getHeader() != null) {
                         networkConfig.getHeader().onHeader(request);
                     }
+                    if (params.headerParam.size() != 0) {
+                        request.add(params.headerParam);
+                    }
+
                     SSLContext sslContext = networkConfig.getSSLContext();
                     if (sslContext != null) {
                         request.setSSLSocketFactory(sslContext.getSocketFactory());
@@ -237,7 +255,6 @@ public class RequestManager {
                         networkConfig.getIPrintLog().onPrintParam(params.url + "\n" +
                                 params.params);
                     }
-                    long start = System.currentTimeMillis();
                     final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
                     if (response.isSucceed()) {
                         String json = response.get();
@@ -276,14 +293,17 @@ public class RequestManager {
                         } else if (exception instanceof ResultError) {
                             stringRes = exception.getMessage();
                         }
-
-                        e.onError(new ResultError(stringRes, exception));
+                        DeviceBandwidthSampler.getInstance().stopSampling();
+                        if (NetworkManager.getInstance().getInitializeConfig().getIDevelopMode() != null) {
+                            String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
+                            double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+                            NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(params.url, request.getParam(), "", System.currentTimeMillis() - request.getStart(), connectionQuality, downloadKBitsPerSecond,exception));
+                        }
                         if (networkConfig.getIPrintLog() != null) {
                             networkConfig.getIPrintLog().onPrintException(new Exception(stringRes, exception));
                         }
-                    }
-                    if (networkConfig.getIDevelopMode() != null) {
-                        networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.mapParams.toString(), response.get(), Math.abs(System.currentTimeMillis() - start)));
+                        e.onError(new ResultError(stringRes, exception));
+
                     }
 
 
@@ -305,31 +325,39 @@ public class RequestManager {
      * @param l      回调
      * @param <T>
      */
-    public <T> void load(final BaseRequest params, final AbstractResponse<T> l) { 
+    public <T> void load(final BaseRequest params, final AbstractResponse<T> l) {
 
         final NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
 
         Type type = ((ParameterizedType) l.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         Request<T> request;
         if (type == String.class) {
-            request = (Request<T>) new com.yuanshenbin.network.request.StringRequest(params.url, params.requestMethod);
+            request = (Request<T>) new StringRequest(params.url, params.requestMethod);
         } else {
             request = new EntityRequest<>(params.url, params.requestMethod, type);
         }
         if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
             postConversion(networkConfig, params, request);
         }
+        if(params.contentType != null &&params.contentType.toString().trim().length() != 0)
+        {
+            request.setContentType(params.contentType);
+        }else {
+            request.setContentType(networkConfig.getContentType());
+        }
         initDialog(params);
         SSLContext sslContext = networkConfig.getSSLContext();
         if (sslContext != null) {
             request.setSSLSocketFactory(sslContext.getSocketFactory());
         }
-        request.setContentType(networkConfig.getContentType());
         request.setConnectTimeout(params.timeOut);
         request.setRetryCount(params.retry);
         request.setCacheMode(params.cacheMode);
         if (networkConfig.getHeader() != null) {
             networkConfig.getHeader().onHeader(request);
+        }
+        if (params.headerParam.size() != 0) {
+            request.add(params.headerParam);
         }
         request.setCancelSign(params.context);
         if (networkConfig.getIPrintLog() != null) {
@@ -365,8 +393,11 @@ public class RequestManager {
                     l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException()));
                     l.onFailed(response.getException());
                 }
+                DeviceBandwidthSampler.getInstance().stopSampling();
                 if (networkConfig.getIDevelopMode() != null) {
-                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.params, response.get() == null ? "" : response.get().toString()));
+                    String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
+                    double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.params, response.get() == null ? "" : response.get().toString(), connectionQuality, downloadKBitsPerSecond,response.getException()));
                 }
 
                 if (networkConfig.getIPrintLog() != null) {
@@ -451,13 +482,13 @@ public class RequestManager {
      * @param params 参数
      * @param l
      */
-    public <T> void upload(final BaseRequest params, final AbstractUploadResponse<T> l) {
+    public <T> void upload(final FileRequest params, final AbstractUploadResponse<T> l) {
         final NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
 
         Type type = ((ParameterizedType) l.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         Request<T> request;
         if (type == String.class) {
-            request = (Request<T>) new com.yuanshenbin.network.request.StringRequest(params.url, params.requestMethod);
+            request = (Request<T>) new StringRequest(params.url, params.requestMethod);
         } else {
             request = new EntityRequest<>(params.url, params.requestMethod, type);
         }
@@ -468,6 +499,14 @@ public class RequestManager {
         }
         if (networkConfig.getHeader() != null) {
             networkConfig.getHeader().onHeader(request);
+        }
+        if (params.headerParam.size() != 0) {
+            request.add(params.headerParam);
+        }
+
+        if(params.contentType != null &&params.contentType.toString().trim().length() != 0)
+        {
+            request.setContentType(params.contentType);
         }
         /**
          * 给上传文件做个监听，可以不需要
@@ -490,12 +529,12 @@ public class RequestManager {
              */
             BasicBinary basicBinary = null;
             if (file.getMode() instanceof File) {
-                basicBinary = new FileBinary((File) file.getMode(), file.getKey());
+                basicBinary = new FileBinary((File) file.getMode(), file.getKey(),params.mimeType);
             } else if (file.getMode() instanceof Bitmap) {
-                basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey());
+                basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey(),params.mimeType);
 
             } else if (file.getMode() instanceof FileInputStream) {
-                basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey());
+                basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey(),params.mimeType);
             }
             request.add(params.fileKey, basicBinary);
 
@@ -568,8 +607,11 @@ public class RequestManager {
                     l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException()));
                     l.onFailed(response.getException());
                 }
+                DeviceBandwidthSampler.getInstance().stopSampling();
                 if (networkConfig.getIDevelopMode() != null) {
-                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.mapParams.toString(), response.get() == null ? "" : response.get().toString()));
+                    String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
+                    double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.mapParams.toString(), response.get() == null ? "" : response.get().toString(), connectionQuality, downloadKBitsPerSecond,response.getException()));
                 }
                 if (networkConfig.getIPrintLog() != null) {
                     networkConfig.getIPrintLog().onPrintException(response.getException());
@@ -628,41 +670,61 @@ public class RequestManager {
                 }
             }
         }
-        if (request instanceof com.yuanshenbin.network.request.StringRequest) {
-            ((com.yuanshenbin.network.request.StringRequest) request).setParam(param);
+        if (request instanceof StringRequest) {
+            ((StringRequest) request).setParam(param);
         } else if (request instanceof EntityRequest) {
-            ((com.yuanshenbin.network.request.EntityRequest) request).setParam(param);
+            ((EntityRequest) request).setParam(param);
         }
 
     }
 
     private void initDialog(BaseRequest params) {
         if (params.isLoading) {
-            INetDialog iDialog = NetworkManager.getInstance().getInitializeConfig().getDialog();
+            INetDialog iDialog;
+            if (params.netDialog != null) {
+                iDialog = params.netDialog;
+                mNetDialogMap.put(String.valueOf(params.hashCode()), iDialog);
+            } else {
+                iDialog = NetworkManager.getInstance().getInitializeConfig().getDialog();
+                mNetDialogMap.put(String.valueOf(params.hashCode()), iDialog);
+            }
             iDialog.init(params.context);
             iDialog.setCancelable(params.isCloseDialog);
             if (!TextUtils.isEmpty(params.loadingTitle)) {
                 iDialog.setMessage(params.loadingTitle);
             }
-            mNetDialogMap.put(String.valueOf(params.hashCode()), iDialog);
+
         }
     }
 
     private void showDialog(BaseRequest params) {
         if (params.isLoading) {
-            INetDialog dialog = mNetDialogMap.get(String.valueOf(params.hashCode()));
-            if (dialog != null && !dialog.isShowing()) {
-                dialog.show();
+            INetDialog iDialog;
+            if (params.netDialog != null) {
+                iDialog = params.netDialog;
+            } else {
+                iDialog = mNetDialogMap.get(String.valueOf(params.hashCode()));
+            }
+            if (iDialog != null && !iDialog.isShowing()) {
+                iDialog.show();
             }
         }
     }
 
     private void dismissDialog(BaseRequest params) {
         if (params.isLoading) {
-            INetDialog dialog = mNetDialogMap.get(String.valueOf(params.hashCode()));
-            if (dialog != null) {
-                dialog.dismiss();
-                mNetDialogMap.remove(String.valueOf(params.hashCode()));
+
+            INetDialog iDialog;
+            if (params.netDialog != null) {
+                iDialog = params.netDialog;
+            } else {
+                iDialog = mNetDialogMap.get(String.valueOf(params.hashCode()));
+            }
+            if (iDialog != null && iDialog.isShowing()) {
+                iDialog.dismiss();
+                if (params.netDialog == null) {
+                    mNetDialogMap.remove(String.valueOf(params.hashCode()));
+                }
             }
 
         }

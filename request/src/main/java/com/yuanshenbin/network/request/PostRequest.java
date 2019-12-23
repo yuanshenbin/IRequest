@@ -7,7 +7,7 @@ import com.yuanshenbin.network.AbstractResponse;
 import com.yuanshenbin.network.manager.NetworkManager;
 
 /**
- * Created by Jacky on 2016/10/31.
+ * Created by yuanshenbin on 2016/10/31.
  */
 public class PostRequest extends BaseRequest<PostRequest> {
 
