@@ -8,7 +8,7 @@ import io.reactivex.Observable;
 
 
 /**
- * Created by yuanshenbin on 2016/12/1.
+ * Created by Jacky on 2016/12/1.
  */
 public class GetRequestRx extends BaseRequest<GetRequestRx> {
 

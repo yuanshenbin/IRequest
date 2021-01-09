@@ -34,6 +34,10 @@ public class EntityRequest<T> extends Request<T> {
 
     }
 
+    public Type getType() {
+        return mType;
+    }
+
     public void setParam(String param) {
         this.param = param;
     }
@@ -48,11 +52,14 @@ public class EntityRequest<T> extends Request<T> {
         int resCode = responseHeaders.getResponseCode();
         if (resCode >= 200 && resCode < 300) { // Http层成功，这里只可能业务逻辑错误。
             try {
+                RecordModel model = null;
                 if (NetworkManager.getInstance().getInitializeConfig().getIDevelopMode() != null) {
                     String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
                     double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
-                    NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(url, param, result, System.currentTimeMillis() - start,connectionQuality,downloadKBitsPerSecond));
+                    model = new RecordModel(url, param, result, System.currentTimeMillis() - start, connectionQuality, downloadKBitsPerSecond, this.getHeaders().toRequestHeaders());
+                    NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(model);
                 }
+
                 T data = NetworkManager.getInstance().getInitializeConfig().getFromJson().onFromJson(result, mType);
                 return data;
             } catch (Exception e) {
@@ -60,9 +67,10 @@ public class EntityRequest<T> extends Request<T> {
             }
 
         } else if (resCode >= 400 && resCode < 500) {
-            throw new ResultError(Constants.HTTP_UNKNOW_ERROR);
+            throw new ResultError( Constants.HTTP_UNKNOW_ERROR+responseHeaders.getResponseCode());
         } else {
-            throw new ResultError(Constants.HTTP_SERVER_ERROR);
+            throw new ResultError(Constants.HTTP_SERVER_ERROR+responseHeaders.getResponseCode());
         }
     }
+
 }

@@ -1,6 +1,5 @@
 package com.yuanshenbin.network;
 
-
 import com.yuanshenbin.network.model.RecordModel;
 
 /**

@@ -9,6 +9,6 @@ import com.yanzhenjie.nohttp.rest.Request;
  */
 
 public interface IHeader {
-
     <T> void onHeader(Request<T> request);
+
 }

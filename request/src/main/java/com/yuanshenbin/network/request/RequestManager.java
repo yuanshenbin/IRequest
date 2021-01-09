@@ -44,6 +44,7 @@ import java.io.FileInputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ import io.reactivex.annotations.NonNull;
 
 
 /**
- * Created by yuanshenbin on 2016/10/31.
+ * Created by Jacky on 2016/10/31.
  */
 public class RequestManager {
 
@@ -108,7 +109,7 @@ public class RequestManager {
     }
 
 
-    public <T> Observable<T> upload(final FileRequest params, final AdaptResponse<T> l) {
+    public <T> Observable<T> upload(final BaseRequest params, final AdaptResponse<T> l) {
         return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<T> e) throws Exception {
@@ -121,10 +122,7 @@ public class RequestManager {
                         networkConfig.getHeader().onHeader(request);
                     }
                     request.add(params.mapParams);
-                    if (params.headerParam.size() != 0) {
-                        request.add(params.headerParam);
-
-                    }
+                    handleAddHeader(params, request);
                     SSLContext sslContext = networkConfig.getSSLContext();
                     if (sslContext != null) {
                         request.setSSLSocketFactory(sslContext.getSocketFactory());
@@ -137,12 +135,12 @@ public class RequestManager {
                     for (UploadFile file : files) {
                         BasicBinary basicBinary = null;
                         if (file.getMode() instanceof File) {
-                            basicBinary = new FileBinary((File) file.getMode(), file.getKey(),params.mimeType);
+                            basicBinary = new FileBinary((File) file.getMode(), file.getKey());
                         } else if (file.getMode() instanceof Bitmap) {
-                            basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey(),params.mimeType);
+                            basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey());
 
                         } else if (file.getMode() instanceof FileInputStream) {
-                            basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey(),params.mimeType);
+                            basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey());
                         }
                         request.add(params.fileKey, basicBinary);
                     }
@@ -165,36 +163,40 @@ public class RequestManager {
                                 try {
                                     e.onNext((T) networkConfig.getFromJson().onFromJson(json, type));
                                 } catch (Exception fromjson) {
-                                    throw new ResultError(Constants.HTTP_SERVER_DATA_FORMAT_ERROR);
+                                    record(params, request, fromjson);
+                                    e.onError(new ResultError(Constants.HTTP_SERVER_DATA_FORMAT_ERROR));
                                 }
                             }
 
                         } else if (resCode >= 400 && resCode < 500) {
-                            throw new ResultError(Constants.HTTP_UNKNOW_ERROR);
+                            record(params, request, new Exception(json));
+                            e.onError(new ResultError(Constants.HTTP_UNKNOW_ERROR + resCode));
                         } else {
-                            throw new ResultError(Constants.HTTP_SERVER_ERROR);
+                            record(params, request, new Exception(json));
+                            e.onError(new ResultError(Constants.HTTP_SERVER_ERROR + resCode));
                         }
 
                     } else {
+                        int resCode = -1;
+                        if (response.getHeaders() != null) {
+                            resCode = response.getHeaders().getResponseCode();
+                        }
                         Exception exception = response.getException();
-                        String stringRes = Constants.HTTP_UNKNOW_ERROR;
+                        String stringRes = Constants.HTTP_UNKNOW_ERROR + resCode;
                         if (exception instanceof NetworkError) {
-                            stringRes = Constants.HTTP_EXCEPTION_NETWORK;
+                            stringRes = Constants.HTTP_EXCEPTION_NETWORK + resCode;
                         } else if (exception instanceof TimeoutError) {
-                            stringRes = Constants.HTTP_EXCEPTION_CONNECT_TIMEOUT;
+                            stringRes = Constants.HTTP_EXCEPTION_CONNECT_TIMEOUT + resCode;
                         } else if (exception instanceof UnKnownHostError) {
-                            stringRes = Constants.HTTP_EXCEPTION_HOST;
+                            stringRes = Constants.HTTP_EXCEPTION_HOST + resCode;
                         } else if (exception instanceof URLError) {
-                            stringRes = Constants.HTTP_EXCEPTION_URL;
+                            stringRes = Constants.HTTP_EXCEPTION_URL + resCode;
                         } else if (exception instanceof ResultError) {
-                            stringRes = exception.getMessage();
+                            stringRes = exception.getMessage() + resCode;
                         }
-                        DeviceBandwidthSampler.getInstance().stopSampling();
-                        if (NetworkManager.getInstance().getInitializeConfig().getIDevelopMode() != null) {
-                            String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
-                            double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
-                            NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(params.url, request.getParam(), "", System.currentTimeMillis() - request.getStart(), connectionQuality, downloadKBitsPerSecond,exception));
-                        }
+
+                        record(params, request, new Exception(stringRes, exception));
+
                         e.onError(new ResultError(stringRes, exception));
                         if (networkConfig.getIPrintLog() != null) {
                             networkConfig.getIPrintLog().onPrintException(new Exception(stringRes, exception));
@@ -215,6 +217,50 @@ public class RequestManager {
 
     }
 
+    public void record(BaseRequest params, StringRequest request, Exception exception) {
+        DeviceBandwidthSampler.getInstance().stopSampling();
+        RecordModel model = null;
+        if (NetworkManager.getInstance().getInitializeConfig().getIDevelopMode() != null) {
+            String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
+            double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+            model = new RecordModel(params.url, request.getParam(), "", System.currentTimeMillis() - request.getStart(), connectionQuality, downloadKBitsPerSecond, exception, request.getHeaders().toRequestHeaders());
+            NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(model);
+        }
+    }
+
+
+    public <T> Response<String> loadSynch(final BaseRequest params) {
+        NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
+        StringRequest request = new StringRequest(params.url, params.requestMethod);
+
+        String body = "";
+        if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
+            body = postConversion(networkConfig, params, request);
+        }
+        request.setContentType(networkConfig.getContentType());
+        request.setCacheKey(params.url);
+        request.setCacheMode(params.cacheMode);
+        request.setConnectTimeout(params.timeOut);
+        request.setRetryCount(params.retry);
+
+        if (networkConfig.getHeader() != null) {
+            networkConfig.getHeader().onHeader(request);
+        }
+        handleAddHeader(params, request);
+
+        SSLContext sslContext = networkConfig.getSSLContext();
+        if (sslContext != null) {
+            request.setSSLSocketFactory(sslContext.getSocketFactory());
+        }
+
+        if (networkConfig.getIPrintLog() != null) {
+            networkConfig.getIPrintLog().onPrintParam(params.url + "\n" +
+                    params.params);
+        }
+        final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
+        return response;
+    }
+
     public <T> Observable<T> load(final BaseRequest params, final AdaptResponse<T> l) {
         return Observable.create(new ObservableOnSubscribe<T>() {
             @Override
@@ -222,18 +268,11 @@ public class RequestManager {
                 NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
                 try {
                     StringRequest request = new StringRequest(params.url, params.requestMethod);
-
+                    String body = "";
                     if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
-                        postConversion(networkConfig, params, request);
+                        body = postConversion(networkConfig, params, request);
                     }
-
-
-                    if(params.contentType != null &&params.contentType.toString().trim().length() != 0)
-                    {
-                        request.setContentType(params.contentType);
-                    }else {
-                        request.setContentType(networkConfig.getContentType());
-                    }
+                    request.setContentType(networkConfig.getContentType());
                     request.setCacheKey(params.url);
                     request.setCacheMode(params.cacheMode);
                     request.setConnectTimeout(params.timeOut);
@@ -242,9 +281,7 @@ public class RequestManager {
                     if (networkConfig.getHeader() != null) {
                         networkConfig.getHeader().onHeader(request);
                     }
-                    if (params.headerParam.size() != 0) {
-                        request.add(params.headerParam);
-                    }
+                    handleAddHeader(params, request);
 
                     SSLContext sslContext = networkConfig.getSSLContext();
                     if (sslContext != null) {
@@ -268,41 +305,43 @@ public class RequestManager {
                                 try {
                                     e.onNext((T) networkConfig.getFromJson().onFromJson(json, type));
                                 } catch (Exception fromjson) {
-                                    throw new ResultError(Constants.HTTP_SERVER_DATA_FORMAT_ERROR);
+                                    record(params, request, fromjson);
+                                    e.onError(new ResultError(Constants.HTTP_SERVER_DATA_FORMAT_ERROR));
                                 }
                             }
 
                         } else if (resCode >= 400 && resCode < 500) {
-                            throw new ResultError(Constants.HTTP_UNKNOW_ERROR);
+                            record(params, request, new Exception(json));
+                            e.onError(new ResultError(Constants.HTTP_UNKNOW_ERROR + resCode));
                         } else {
-                            throw new ResultError(Constants.HTTP_SERVER_ERROR);
+                            record(params, request, new Exception(json));
+                            e.onError(new ResultError(Constants.HTTP_SERVER_ERROR + resCode));
                         }
-
-
                     } else {
+                        int resCode = -1;
+                        if (response.getHeaders() != null) {
+                            resCode = response.getHeaders().getResponseCode();
+                        }
                         Exception exception = response.getException();
-                        String stringRes = Constants.HTTP_UNKNOW_ERROR;
+                        String stringRes = Constants.HTTP_UNKNOW_ERROR + resCode;
                         if (exception instanceof NetworkError) {
-                            stringRes = Constants.HTTP_EXCEPTION_NETWORK;
+                            stringRes = Constants.HTTP_EXCEPTION_NETWORK + resCode;
                         } else if (exception instanceof TimeoutError) {
-                            stringRes = Constants.HTTP_EXCEPTION_CONNECT_TIMEOUT;
+                            stringRes = Constants.HTTP_EXCEPTION_CONNECT_TIMEOUT + resCode;
                         } else if (exception instanceof UnKnownHostError) {
-                            stringRes = Constants.HTTP_EXCEPTION_HOST;
+                            stringRes = Constants.HTTP_EXCEPTION_HOST + resCode;
                         } else if (exception instanceof URLError) {
-                            stringRes = Constants.HTTP_EXCEPTION_URL;
+                            stringRes = Constants.HTTP_EXCEPTION_URL + resCode;
                         } else if (exception instanceof ResultError) {
-                            stringRes = exception.getMessage();
+                            stringRes = exception.getMessage() + resCode;
                         }
-                        DeviceBandwidthSampler.getInstance().stopSampling();
-                        if (NetworkManager.getInstance().getInitializeConfig().getIDevelopMode() != null) {
-                            String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
-                            double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
-                            NetworkManager.getInstance().getInitializeConfig().getIDevelopMode().onRecord(new RecordModel(params.url, request.getParam(), "", System.currentTimeMillis() - request.getStart(), connectionQuality, downloadKBitsPerSecond,exception));
-                        }
+
+                        record(params, request, new Exception(stringRes, exception));
+
+                        e.onError(new ResultError(stringRes, exception));
                         if (networkConfig.getIPrintLog() != null) {
                             networkConfig.getIPrintLog().onPrintException(new Exception(stringRes, exception));
                         }
-                        e.onError(new ResultError(stringRes, exception));
 
                     }
 
@@ -330,40 +369,35 @@ public class RequestManager {
         final NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
 
         Type type = ((ParameterizedType) l.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        Request<T> request;
+        final Request<T> request;
         if (type == String.class) {
             request = (Request<T>) new StringRequest(params.url, params.requestMethod);
         } else {
             request = new EntityRequest<>(params.url, params.requestMethod, type);
         }
+        String body = "";
         if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
-            postConversion(networkConfig, params, request);
-        }
-        if(params.contentType != null &&params.contentType.toString().trim().length() != 0)
-        {
-            request.setContentType(params.contentType);
-        }else {
-            request.setContentType(networkConfig.getContentType());
+            body = postConversion(networkConfig, params, request);
         }
         initDialog(params);
         SSLContext sslContext = networkConfig.getSSLContext();
         if (sslContext != null) {
             request.setSSLSocketFactory(sslContext.getSocketFactory());
         }
+        request.setContentType(networkConfig.getContentType());
         request.setConnectTimeout(params.timeOut);
         request.setRetryCount(params.retry);
         request.setCacheMode(params.cacheMode);
         if (networkConfig.getHeader() != null) {
             networkConfig.getHeader().onHeader(request);
         }
-        if (params.headerParam.size() != 0) {
-            request.add(params.headerParam);
-        }
+        handleAddHeader(params, request);
         request.setCancelSign(params.context);
         if (networkConfig.getIPrintLog() != null) {
             networkConfig.getIPrintLog().onPrintParam(params.url + "\n" +
                     params.params);
         }
+        final Map<String, String> requestHeaders = request.getHeaders().toRequestHeaders();
         getRequestQueue().add(params.what, request, new OnResponseListener<T>() {
             @Override
             public void onStart(int what) {
@@ -376,7 +410,7 @@ public class RequestManager {
             @Override
             public void onSucceed(int what, Response<T> response) {
                 if (l != null) {
-                    l.onResponseState(new ResponseModel(ResponseEnum.成功));
+                    l.onResponseState(new ResponseModel(ResponseEnum.成功, response.getHeaders().toResponseHeaders()));
                     l.onSuccess(response.get());
                 }
 
@@ -390,14 +424,15 @@ public class RequestManager {
             @Override
             public void onFailed(int what, Response<T> response) {
                 if (l != null) {
-                    l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException()));
+                    l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException(), response.getHeaders().toResponseHeaders()));
                     l.onFailed(response.getException());
                 }
                 DeviceBandwidthSampler.getInstance().stopSampling();
+
                 if (networkConfig.getIDevelopMode() != null) {
                     String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
                     double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
-                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.params, response.get() == null ? "" : response.get().toString(), connectionQuality, downloadKBitsPerSecond,response.getException()));
+                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.params, response.get() == null ? "" : response.get().toString(), connectionQuality, downloadKBitsPerSecond, response.getException(), requestHeaders));
                 }
 
                 if (networkConfig.getIPrintLog() != null) {
@@ -482,7 +517,7 @@ public class RequestManager {
      * @param params 参数
      * @param l
      */
-    public <T> void upload(final FileRequest params, final AbstractUploadResponse<T> l) {
+    public <T> void upload(final BaseRequest params, final AbstractUploadResponse<T> l) {
         final NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
 
         Type type = ((ParameterizedType) l.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
@@ -500,14 +535,8 @@ public class RequestManager {
         if (networkConfig.getHeader() != null) {
             networkConfig.getHeader().onHeader(request);
         }
-        if (params.headerParam.size() != 0) {
-            request.add(params.headerParam);
-        }
+        handleAddHeader(params, request);
 
-        if(params.contentType != null &&params.contentType.toString().trim().length() != 0)
-        {
-            request.setContentType(params.contentType);
-        }
         /**
          * 给上传文件做个监听，可以不需要
          */
@@ -529,12 +558,12 @@ public class RequestManager {
              */
             BasicBinary basicBinary = null;
             if (file.getMode() instanceof File) {
-                basicBinary = new FileBinary((File) file.getMode(), file.getKey(),params.mimeType);
+                basicBinary = new FileBinary((File) file.getMode(), file.getKey());
             } else if (file.getMode() instanceof Bitmap) {
-                basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey(),params.mimeType);
+                basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey());
 
             } else if (file.getMode() instanceof FileInputStream) {
-                basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey(),params.mimeType);
+                basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey());
             }
             request.add(params.fileKey, basicBinary);
 
@@ -583,6 +612,7 @@ public class RequestManager {
             networkConfig.getIPrintLog().onPrintParam(params.url + "\n" +
                     params.mapParams);
         }
+        final Map<String, String> requestHeaders = request.getHeaders().toRequestHeaders();
         getRequestQueue().add(params.what, request, new OnResponseListener<T>() {
             @Override
             public void onStart(int what) {
@@ -595,7 +625,7 @@ public class RequestManager {
             @Override
             public void onSucceed(int what, Response<T> response) {
                 if (l != null) {
-                    l.onResponseState(new ResponseModel(ResponseEnum.成功));
+                    l.onResponseState(new ResponseModel(ResponseEnum.成功, response.getHeaders().toResponseHeaders()));
                     l.onSuccess(response.get());
                 }
 
@@ -604,15 +634,16 @@ public class RequestManager {
             @Override
             public void onFailed(int what, Response<T> response) {
                 if (l != null) {
-                    l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException()));
+                    l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException(), response.getHeaders().toResponseHeaders()));
                     l.onFailed(response.getException());
                 }
                 DeviceBandwidthSampler.getInstance().stopSampling();
                 if (networkConfig.getIDevelopMode() != null) {
                     String connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQualityStr();
                     double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
-                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.mapParams.toString(), response.get() == null ? "" : response.get().toString(), connectionQuality, downloadKBitsPerSecond,response.getException()));
+                    networkConfig.getIDevelopMode().onRecord(new RecordModel(params.url, params.mapParams.toString(), response.get() == null ? "" : response.get().toString(), connectionQuality, downloadKBitsPerSecond, response.getException(), requestHeaders));
                 }
+
                 if (networkConfig.getIPrintLog() != null) {
                     networkConfig.getIPrintLog().onPrintException(response.getException());
                 }
@@ -630,14 +661,33 @@ public class RequestManager {
 
 
     /**
+     * 处理addHeader数据
+     *
+     * @param params
+     * @param request
+     * @param <T>
+     */
+    private <T> void handleAddHeader(BaseRequest params, Request<T> request) {
+        if (params.headerParam.size() != 0) {
+            Iterator<Map.Entry<String, String>> iterator = params.headerParam.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> entry = iterator.next();
+                String key = entry.getKey();
+                String value = entry.getValue();
+                request.setHeader(key, value);
+            }
+        }
+    }
+
+    /**
      * post请求参数转换
      */
-    private <T> void postConversion(NetworkConfig networkConfig, BaseRequest params, Request<T> request) {
+    private <T> String postConversion(NetworkConfig networkConfig, BaseRequest params, Request<T> request) {
 
         String param = "";
         if (TextUtils.isEmpty(params.contentType)) {
             if (networkConfig.getContentType().equals(Headers.HEAD_VALUE_CONTENT_TYPE_JSON)) {
-                if (!params.params.equals("{}")) {
+                if (params.params != null && params.params.length() != 0 && !params.params.equals("{}")) {
                     request.setDefineRequestBodyForJson(params.params);
                 }
                 param = params.params;
@@ -655,7 +705,7 @@ public class RequestManager {
         } else {
 
             if (params.contentType.equals(Headers.HEAD_VALUE_CONTENT_TYPE_JSON)) {
-                if (!params.params.equals("{}")) {
+                if (params.params != null && params.params.length() != 0 && !params.params.equals("{}")) {
                     request.setDefineRequestBodyForJson(params.params);
                     param = params.params;
                 }
@@ -675,6 +725,8 @@ public class RequestManager {
         } else if (request instanceof EntityRequest) {
             ((EntityRequest) request).setParam(param);
         }
+
+        return param;
 
     }
 

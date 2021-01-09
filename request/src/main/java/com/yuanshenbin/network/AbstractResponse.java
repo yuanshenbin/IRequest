@@ -10,6 +10,7 @@ import com.yuanshenbin.network.error.ResultError;
 import com.yuanshenbin.network.manager.NetworkManager;
 import com.yuanshenbin.network.model.ResponseModel;
 
+
 /**
  * Created by yuanshenbin on 2016/10/31.
  */
@@ -28,11 +29,16 @@ public abstract class AbstractResponse<T> {
             stringRes = Constants.HTTP_EXCEPTION_URL;
         } else if (exception instanceof ResultError) {
             stringRes = exception.getMessage();
+
         }
-        NetworkManager.getInstance().getInitializeConfig().getToastFailed().onFailed(new ResultError(stringRes, exception));
+        if (NetworkManager.getInstance().getInitializeConfig().getToastFailed() != null) {
+            NetworkManager.getInstance().getInitializeConfig().getToastFailed().onFailed(new ResultError(stringRes, exception));
+        }
+
     }
 
     public void onResponseState(ResponseModel result) {
 
     }
+
 }

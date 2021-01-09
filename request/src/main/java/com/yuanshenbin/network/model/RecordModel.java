@@ -1,6 +1,7 @@
 package com.yuanshenbin.network.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * author : yuanshenbin
@@ -10,11 +11,15 @@ import java.io.Serializable;
 
 public class RecordModel implements Serializable {
 
-    private  Exception exception;
-    private  String url;
+    private Exception exception;
+    private String url;
     private String param;
-    private  String result;
-    private  long  requestTime;
+    private String result;
+    private long requestTime;
+    private int httpCode;
+
+
+    private Map<String, String> headers;
     /**
      * 链接质量
      */
@@ -23,37 +28,48 @@ public class RecordModel implements Serializable {
     /**
      * 每秒流量值
      */
-    private  double KBitsPerSecond;
+    private double KBitsPerSecond;
+
+    public int getHttpCode() {
+        return httpCode;
+    }
+
+    public void setHttpCode(int httpCode) {
+        this.httpCode = httpCode;
+    }
+
     public RecordModel() {
     }
 
-    public RecordModel(String url, String param, String result) {
-        this.url = url;
-        this.param = param;
-        this.result = result;
-    }
-    public RecordModel(String url, String param, String result, String connectionQuality, double KBitsPerSecond) {
+    public RecordModel(String url, String param, String result, String connectionQuality, double KBitsPerSecond, Exception e, Map<String, String> headers) {
         this.url = url;
         this.param = param;
         this.result = result;
         this.connectionQuality = connectionQuality;
         this.KBitsPerSecond = KBitsPerSecond;
-    }
-    public RecordModel(String url, String param, String result, String connectionQuality, double KBitsPerSecond,Exception e) {
-        this.url = url;
-        this.param = param;
-        this.result = result;
-        this.connectionQuality = connectionQuality;
-        this.KBitsPerSecond = KBitsPerSecond;
-        this.exception=e;
-    }
-    public RecordModel(String url, String param, String result, long requestTime) {
-        this.url = url;
-        this.param = param;
-        this.result = result;
-        this.requestTime = requestTime;
+        this.exception = e;
+        this.headers = headers;
     }
 
+    public RecordModel(String url, String param, String result, Exception e, Map<String, String> headers) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.exception = e;
+        this.headers = headers;
+    }
+
+    @Deprecated
+    public RecordModel(String url, String param, String result, String connectionQuality, double KBitsPerSecond, Exception e) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.connectionQuality = connectionQuality;
+        this.KBitsPerSecond = KBitsPerSecond;
+        this.exception = e;
+    }
+
+    @Deprecated
     public RecordModel(String url, String param, String result, long requestTime, String connectionQuality, double KBitsPerSecond) {
         this.url = url;
         this.param = param;
@@ -63,14 +79,55 @@ public class RecordModel implements Serializable {
         this.KBitsPerSecond = KBitsPerSecond;
     }
 
-    public RecordModel(String url, String param, String result, long requestTime, String connectionQuality, double KBitsPerSecond,Exception e) {
+    public RecordModel(String url, String param, String result, long requestTime, String connectionQuality, double KBitsPerSecond, Map<String, String> headers) {
         this.url = url;
         this.param = param;
         this.result = result;
         this.requestTime = requestTime;
         this.connectionQuality = connectionQuality;
         this.KBitsPerSecond = KBitsPerSecond;
-        this.exception=e;
+        this.headers = headers;
+    }
+
+    public RecordModel(String url, String param, String result, long requestTime, Map<String, String> headers) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.requestTime = requestTime;
+        this.headers = headers;
+    }
+
+    @Deprecated
+    public RecordModel(String url, String param, String result, long requestTime, String connectionQuality, double KBitsPerSecond, Exception e) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.requestTime = requestTime;
+        this.connectionQuality = connectionQuality;
+        this.KBitsPerSecond = KBitsPerSecond;
+        this.exception = e;
+    }
+
+    public RecordModel(String url, String param, String result, long requestTime, String connectionQuality, double KBitsPerSecond, Exception e, Map<String, String> headers) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.requestTime = requestTime;
+        this.connectionQuality = connectionQuality;
+        this.KBitsPerSecond = KBitsPerSecond;
+        this.exception = e;
+        this.headers = headers;
+    }
+
+
+
+    public RecordModel(String url, String param, String result, long requestTime, Exception e, Map<String, String> headers) {
+        this.url = url;
+        this.param = param;
+        this.result = result;
+        this.requestTime = requestTime;
+        this.exception = e;
+        this.headers = headers;
     }
 
     public long getRequestTime() {
@@ -129,6 +186,15 @@ public class RecordModel implements Serializable {
 
     public void setException(Exception exception) {
         this.exception = exception;
+    }
+
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     @Override

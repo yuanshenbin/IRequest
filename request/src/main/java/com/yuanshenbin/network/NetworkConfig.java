@@ -3,6 +3,7 @@ package com.yuanshenbin.network;
 import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.InitializationConfig;
 import com.yanzhenjie.nohttp.NoHttp;
+import java.util.ArrayList;
 
 import javax.net.ssl.SSLContext;
 
@@ -20,9 +21,10 @@ public class NetworkConfig {
     private IDevelopMode mIDevelopMode;
     private IToastFailed mIToastFailed;
     private SSLContext mSSLContext;
-    private INetworkLinstener mINetworkLinstener;
+    private INetworkListener mINetworkLinstener;
     private IHeader mIHeader;
-    private IContentType mIContentType =new IContentType() {
+
+    private IContentType mIContentType = new IContentType() {
         @Override
         public String getContentType() {
             return Headers.HEAD_VALUE_CONTENT_TYPE_JSON;
@@ -46,6 +48,7 @@ public class NetworkConfig {
         mThreadPoolSize = builder.mThreadPoolSize;
         mIHeader = builder.mHeader;
         mIContentType = builder.mContentType;
+
     }
 
     public static final class Builder {
@@ -89,7 +92,7 @@ public class NetworkConfig {
         /**
          * 统一需要处理相关事件
          */
-        private INetworkLinstener mNetworkLinstener;
+        private INetworkListener mNetworkLinstener;
 
         /**
          * 头部
@@ -144,7 +147,7 @@ public class NetworkConfig {
             return this;
         }
 
-        public Builder networkLinstener(INetworkLinstener linstener) {
+        public Builder networkLinstener(INetworkListener linstener) {
             this.mNetworkLinstener = linstener;
             return this;
         }
@@ -164,7 +167,6 @@ public class NetworkConfig {
             this.mContentType = contentType;
             return this;
         }
-
 
         public NetworkConfig build() {
             return new NetworkConfig(this);
@@ -196,7 +198,7 @@ public class NetworkConfig {
         return mIToastFailed;
     }
 
-    public INetworkLinstener getNetworkLinstener() {
+    public INetworkListener getNetworkLinstener() {
         return mINetworkLinstener;
     }
 
@@ -211,4 +213,5 @@ public class NetworkConfig {
     public String getContentType() {
         return mIContentType.getContentType();
     }
+
 }

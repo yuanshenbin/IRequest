@@ -3,7 +3,7 @@ package com.yuanshenbin.network.model;
 import java.io.Serializable;
 
 /**
- * Created by yuanshenbin on 2016/7/4.
+ * Created by Jacky on 2016/7/4.
  * 上传需要的参数
  */
 
@@ -48,7 +48,7 @@ public class UploadFile implements Serializable {
         this.key = key;
     }
 
-    public UploadFile(String key,Object mode) {
+    public UploadFile(String key, Object mode) {
         this.mode = mode;
         this.key = key;
     }

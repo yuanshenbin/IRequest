@@ -10,7 +10,7 @@ public class Constants {
 
     public static final String HTTP_SERVER_DATA_FORMAT_ERROR = "数据格式解析错误";
     public static final String HTTP_SERVER_ERROR = "服务器开小差啦";
-    public static final String HTTP_UNKNOW_ERROR = "发生未知异常";
+    public static final String HTTP_UNKNOW_ERROR = "网络异常";
 
     public static final String HTTP_EXCEPTION_NETWORK = "网络不可用，请检查网络";
 

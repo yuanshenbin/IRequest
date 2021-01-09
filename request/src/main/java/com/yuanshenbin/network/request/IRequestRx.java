@@ -1,7 +1,7 @@
 package com.yuanshenbin.network.request;
 
 /**
- * Created by yuanshenbin on 2016/12/1.
+ * Created by Jacky on 2016/12/1.
  */
 
 public class IRequestRx {

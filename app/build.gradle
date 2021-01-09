@@ -1,35 +1,25 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
     defaultConfig {
         applicationId "com.ysb"
-        minSdkVersion 16
-        targetSdkVersion 26
+        minSdkVersion 18
+        targetSdkVersion 30
         versionCode 1
-        versionName "1.2.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    testCompile 'junit:junit:4.12'
-    compile 'com.orhanobut:logger:2.1.1'
-    compile project(':request')
-    compile 'com.squareup.leakcanary:leakcanary-android:1.6.2'
-    // Optional, if you use support library fragments:
-    compile 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
-    compile 'com.google.code.gson:gson:2.2.4'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:+'
 }
