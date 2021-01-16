@@ -39,6 +39,8 @@ import com.yuanshenbin.network.model.RecordModel;
 import com.yuanshenbin.network.model.ResponseModel;
 import com.yuanshenbin.network.model.UploadFile;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.ParameterizedType;
@@ -687,10 +689,14 @@ public class RequestManager {
         String param = "";
         if (TextUtils.isEmpty(params.contentType)) {
             if (networkConfig.getContentType().equals(Headers.HEAD_VALUE_CONTENT_TYPE_JSON)) {
-                if (params.params != null && params.params.length() != 0 && !params.params.equals("{}")) {
+                if (!TextUtils.isEmpty(params.params)) {
                     request.setDefineRequestBodyForJson(params.params);
+                    param = params.params;
+                }else {
+                    param=new JSONObject().toString();
+                    request.setDefineRequestBodyForJson(param);
                 }
-                param = params.params;
+
 
             } else {
                 if (params.mapParams.size() == 0) {
@@ -705,9 +711,12 @@ public class RequestManager {
         } else {
 
             if (params.contentType.equals(Headers.HEAD_VALUE_CONTENT_TYPE_JSON)) {
-                if (params.params != null && params.params.length() != 0 && !params.params.equals("{}")) {
+                if (!TextUtils.isEmpty(params.params)) {
                     request.setDefineRequestBodyForJson(params.params);
                     param = params.params;
+                }else {
+                    param=new JSONObject().toString();
+                    request.setDefineRequestBodyForJson(param);
                 }
             } else {
                 if (params.mapParams.size() == 0) {
