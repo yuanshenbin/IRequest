@@ -274,7 +274,12 @@ public class RequestManager {
                     if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
                         body = postConversion(networkConfig, params, request);
                     }
-                    request.setContentType(networkConfig.getContentType());
+
+                    if (TextUtils.isEmpty(params.contentType)) {
+                        request.setContentType(networkConfig.getContentType());
+                    } else {
+                        request.setContentType(params.contentType);
+                    }
                     request.setCacheKey(params.url);
                     request.setCacheMode(params.cacheMode);
                     request.setConnectTimeout(params.timeOut);
@@ -386,7 +391,11 @@ public class RequestManager {
         if (sslContext != null) {
             request.setSSLSocketFactory(sslContext.getSocketFactory());
         }
-        request.setContentType(networkConfig.getContentType());
+        if (TextUtils.isEmpty(params.contentType)) {
+            request.setContentType(networkConfig.getContentType());
+        } else {
+            request.setContentType(params.contentType);
+        }
         request.setConnectTimeout(params.timeOut);
         request.setRetryCount(params.retry);
         request.setCacheMode(params.cacheMode);
@@ -692,8 +701,8 @@ public class RequestManager {
                 if (!TextUtils.isEmpty(params.params)) {
                     request.setDefineRequestBodyForJson(params.params);
                     param = params.params;
-                }else {
-                    param=new JSONObject().toString();
+                } else {
+                    param = new JSONObject().toString();
                     request.setDefineRequestBodyForJson(param);
                 }
 
@@ -714,8 +723,8 @@ public class RequestManager {
                 if (!TextUtils.isEmpty(params.params)) {
                     request.setDefineRequestBodyForJson(params.params);
                     param = params.params;
-                }else {
-                    param=new JSONObject().toString();
+                } else {
+                    param = new JSONObject().toString();
                     request.setDefineRequestBodyForJson(param);
                 }
             } else {
