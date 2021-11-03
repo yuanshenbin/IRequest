@@ -37,6 +37,7 @@ import com.yuanshenbin.network.error.ResultError;
 import com.yuanshenbin.network.manager.NetworkManager;
 import com.yuanshenbin.network.model.RecordModel;
 import com.yuanshenbin.network.model.ResponseModel;
+import com.yuanshenbin.network.model.SyncResult;
 import com.yuanshenbin.network.model.UploadFile;
 
 import org.json.JSONObject;
@@ -59,7 +60,7 @@ import io.reactivex.annotations.NonNull;
 
 
 /**
- * Created by Jacky on 2016/10/31.
+ * Created by yuanshenbin on 2016/10/31.
  */
 public class RequestManager {
 
@@ -231,36 +232,101 @@ public class RequestManager {
     }
 
 
-    public <T> Response<String> loadSynch(final BaseRequest params) {
+    public <T> SyncResult loadSync(final BaseRequest params, final AdaptResponse<T> l) {
+        SyncResult<T> syncResult = new SyncResult<>();
         NetworkConfig networkConfig = NetworkManager.getInstance().getInitializeConfig();
-        StringRequest request = new StringRequest(params.url, params.requestMethod);
+        try {
+            StringRequest request = new StringRequest(params.url, params.requestMethod);
+            String body = "";
+            if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
+                body = postConversion(networkConfig, params, request);
+            }
+            if (TextUtils.isEmpty(params.contentType)) {
+                request.setContentType(networkConfig.getContentType());
+            } else {
+                request.setContentType(params.contentType);
+            }
+            request.setCacheKey(params.url);
+            request.setCacheMode(params.cacheMode);
+            request.setConnectTimeout(params.timeOut);
+            request.setRetryCount(params.retry);
 
-        String body = "";
-        if (params.requestMethod.getValue().equals(RequestMethod.POST.getValue())) {
-            body = postConversion(networkConfig, params, request);
-        }
-        request.setContentType(networkConfig.getContentType());
-        request.setCacheKey(params.url);
-        request.setCacheMode(params.cacheMode);
-        request.setConnectTimeout(params.timeOut);
-        request.setRetryCount(params.retry);
+            if (networkConfig.getHeader() != null) {
+                networkConfig.getHeader().onHeader(request);
+            }
+            handleAddHeader(params, request);
 
-        if (networkConfig.getHeader() != null) {
-            networkConfig.getHeader().onHeader(request);
-        }
-        handleAddHeader(params, request);
+            SSLContext sslContext = networkConfig.getSSLContext();
+            if (sslContext != null) {
+                request.setSSLSocketFactory(sslContext.getSocketFactory());
+            }
 
-        SSLContext sslContext = networkConfig.getSSLContext();
-        if (sslContext != null) {
-            request.setSSLSocketFactory(sslContext.getSocketFactory());
+            if (networkConfig.getIPrintLog() != null) {
+                networkConfig.getIPrintLog().onPrintParam(params.url + "\n" +
+                        params.params);
+            }
+            final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
+            if (response.isSucceed()) {
+                String json = response.get();
+                networkConfig.getIPrintLog().onPrintResult(json);
+                int resCode = response.getHeaders().getResponseCode();
+                if (resCode >= 200 && resCode < 300) { // Http层成功，这里只可能业务逻辑错误。
+                    Type type = ((ParameterizedType) l.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+                    if (type == String.class) {
+                        syncResult.setResult((T) json);
+                    } else {
+                        try {
+                            syncResult.setResult((T) networkConfig.getFromJson().onFromJson(json, type));
+                        } catch (Exception fromjson) {
+                            record(params, request, fromjson);
+                            syncResult.setException(new ResultError(Constants.HTTP_SERVER_DATA_FORMAT_ERROR));
+                        }
+                    }
+
+                } else if (resCode >= 400 && resCode < 500) {
+                    record(params, request, new Exception(json));
+                    syncResult.setException(new ResultError(Constants.HTTP_UNKNOW_ERROR+resCode));
+                } else {
+                    record(params, request, new Exception(json));
+                    syncResult.setException(new ResultError(Constants.HTTP_SERVER_ERROR+resCode));
+                }
+            } else {
+                int resCode = -1;
+                if (response.getHeaders() != null) {
+                    resCode = response.getHeaders().getResponseCode();
+                }
+                Exception exception = response.getException();
+                String stringRes = Constants.HTTP_UNKNOW_ERROR+resCode;
+                if (exception instanceof NetworkError) {
+                    stringRes = Constants.HTTP_EXCEPTION_NETWORK+resCode;
+                } else if (exception instanceof TimeoutError) {
+                    stringRes = Constants.HTTP_EXCEPTION_CONNECT_TIMEOUT+resCode;
+                } else if (exception instanceof UnKnownHostError) {
+                    stringRes = Constants.HTTP_EXCEPTION_HOST+ resCode;
+                } else if (exception instanceof URLError) {
+                    stringRes = Constants.HTTP_EXCEPTION_URL+ resCode;
+                } else if (exception instanceof ResultError) {
+                    stringRes = exception.getMessage()+ resCode;
+                }
+
+                record(params, request, new Exception(stringRes, exception));
+
+                syncResult.setException(new ResultError(stringRes, exception));
+                if (networkConfig.getIPrintLog() != null) {
+                    networkConfig.getIPrintLog().onPrintException(new Exception(stringRes, exception));
+                }
+
+            }
+
+
+        } catch (Exception exception) {
+            syncResult.setException(exception);
+            if (networkConfig.getIPrintLog() != null) {
+                networkConfig.getIPrintLog().onPrintException(exception);
+            }
         }
 
-        if (networkConfig.getIPrintLog() != null) {
-            networkConfig.getIPrintLog().onPrintParam(params.url + "\n" +
-                    params.params);
-        }
-        final Response<String> response = SyncRequestExecutor.INSTANCE.execute(request);
-        return response;
+        return syncResult;
     }
 
     public <T> Observable<T> load(final BaseRequest params, final AdaptResponse<T> l) {
@@ -569,12 +635,12 @@ public class RequestManager {
              */
             BasicBinary basicBinary = null;
             if (file.getMode() instanceof File) {
-                basicBinary = new FileBinary((File) file.getMode(), file.getKey());
+                basicBinary = new FileBinary((File) file.getMode(), file.getKey(),params.mimeType);
             } else if (file.getMode() instanceof Bitmap) {
-                basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey());
+                basicBinary = new BitmapBinary((Bitmap) file.getMode(), file.getKey(),params.mimeType);
 
             } else if (file.getMode() instanceof FileInputStream) {
-                basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey());
+                basicBinary = new InputStreamBinary((FileInputStream) file.getMode(), file.getKey(),params.mimeType);
             }
             request.add(params.fileKey, basicBinary);
 

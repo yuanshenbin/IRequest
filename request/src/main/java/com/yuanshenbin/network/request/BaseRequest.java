@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.rest.CacheMode;
 import com.yuanshenbin.network.INetDialog;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Jacky on 2016/10/31.
+ * Created by yuanshenbin on 2016/10/31.
  */
 public abstract class BaseRequest<T extends BaseRequest> {
 
@@ -107,7 +108,10 @@ public abstract class BaseRequest<T extends BaseRequest> {
      */
     protected String fileKey = "file";
 
-
+    /**
+     * 文件类型
+     */
+    protected String mimeType= Headers.HEAD_VALUE_CONTENT_TYPE_FORM_DATA;
     /**
      * 请求类型
      */
@@ -115,6 +119,10 @@ public abstract class BaseRequest<T extends BaseRequest> {
 
     protected INetDialog netDialog;
 
+    public T mimeType(String mimeType) {
+        this.mimeType = mimeType;
+        return (T) this;
+    }
     public T loadingImpl(INetDialog netDialog) {
         this.netDialog = netDialog;
         return (T) this;
