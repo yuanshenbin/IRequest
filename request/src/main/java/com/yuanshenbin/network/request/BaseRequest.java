@@ -47,7 +47,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
      */
     public String params = new HashMap<>().toString();
 
-    public Map<String, Object> mapParams = new HashMap<>();
+    public Map<String, String> mapParams = new HashMap<>();
 
     /**
      * 超时时间
@@ -100,7 +100,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
     /**
      * 头部参数
      */
-    public Map<Object, Object> headerParam = new HashMap<>();
+    public Map<String, String> headerParam = new HashMap<>();
 
 
     /***
@@ -111,7 +111,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
     /**
      * 文件类型
      */
-    protected String mimeType= Headers.HEAD_VALUE_CONTENT_TYPE_FORM_DATA;
+    protected String mimeType = Headers.HEAD_VALUE_CONTENT_TYPE_FORM_DATA;
     /**
      * 请求类型
      */
@@ -123,6 +123,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
         this.mimeType = mimeType;
         return (T) this;
     }
+
     public T loadingImpl(INetDialog netDialog) {
         this.netDialog = netDialog;
         return (T) this;
@@ -190,12 +191,32 @@ public abstract class BaseRequest<T extends BaseRequest> {
         return (T) this;
     }
 
-    public T params(String key, Object value) {
+    public T params(String key, String value) {
         mapParams.put(key, value);
         return (T) this;
     }
 
-    public T params(Map<String, Object> maps) {
+    public T params(String key, int value) {
+        mapParams.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T params(String key, double value) {
+        mapParams.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T params(String key, long value) {
+        mapParams.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T params(String key, float value) {
+        mapParams.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T params(Map<String, String> maps) {
         mapParams.putAll(maps);
         return (T) this;
     }
@@ -216,7 +237,27 @@ public abstract class BaseRequest<T extends BaseRequest> {
         return (T) this;
     }
 
-    public T headerParam(Map<Object, Object> value) {
+    public T headerParam(String key, double value) {
+        headerParam.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T headerParam(String key, int value) {
+        headerParam.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T headerParam(String key, long value) {
+        headerParam.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T headerParam(String key, float value) {
+        headerParam.put(key, String.valueOf(value));
+        return (T) this;
+    }
+
+    public T headerParam(Map<String, String> value) {
         headerParam.putAll(value);
         return (T) this;
     }
@@ -256,7 +297,7 @@ public abstract class BaseRequest<T extends BaseRequest> {
             return false;
     }
 
-    protected String Joint(String url, Map<String, Object> params) {
+    protected String Joint(String url, Map<String, String> params) {
         if (url.indexOf("?") < 0) {
             url += "?";
         }
@@ -264,12 +305,12 @@ public abstract class BaseRequest<T extends BaseRequest> {
             for (Object name : params.keySet()) {
                 try {
 
-                    if (TextUtils.isEmpty((String) params.get(name))) {
+                    if (TextUtils.isEmpty(params.get(name))) {
                         url += "&" + name + "="
                                 + "";
                     } else {
                         url += "&" + name + "="
-                                + URLEncoder.encode((String) params.get(name), "UTF-8");
+                                + URLEncoder.encode(params.get(name), "UTF-8");
                     }
 
                 } catch (UnsupportedEncodingException e) {

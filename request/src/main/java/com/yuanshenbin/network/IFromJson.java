@@ -15,5 +15,5 @@ public interface IFromJson {
 
     String onToJson(Object object);
 
-    Map<String, Object> onJsonToMap(Object param);
+    Map<String, String> onJsonToMap(Object param);
 }
