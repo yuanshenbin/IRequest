@@ -501,7 +501,7 @@ public class RequestManager {
             @Override
             public void onFailed(int what, Response<T> response) {
                 if (l != null) {
-                    l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException(),response.getHeaders()!=null response.getHeaders().toResponseHeaders() : new HashMap<String,List<String>>()));
+                    l.onResponseState(new ResponseModel(ResponseEnum.失败, response.getException(),response.getHeaders()!=null ?  response.getHeaders().toResponseHeaders() : new HashMap<String,List<String>>()));
                     l.onFailed(response.getException());
                 }
                 DeviceBandwidthSampler.getInstance().stopSampling();
