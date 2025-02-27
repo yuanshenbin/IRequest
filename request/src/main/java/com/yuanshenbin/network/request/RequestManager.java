@@ -120,6 +120,7 @@ public class RequestManager {
                 try {
                     StringRequest request = new StringRequest(params.url, RequestMethod.POST);
                     request.setConnectTimeout(params.timeOut);
+                    request.setReadTimeout(params.timeOut);
                     request.setRetryCount(params.retry);
                     if (networkConfig.getHeader() != null) {
                         networkConfig.getHeader().onHeader(request);
@@ -249,6 +250,7 @@ public class RequestManager {
             request.setCacheKey(params.url);
             request.setCacheMode(params.cacheMode);
             request.setConnectTimeout(params.timeOut);
+            request.setReadTimeout(params.timeOut);
             request.setRetryCount(params.retry);
 
             if (networkConfig.getHeader() != null) {
@@ -349,6 +351,7 @@ public class RequestManager {
                     request.setCacheKey(params.url);
                     request.setCacheMode(params.cacheMode);
                     request.setConnectTimeout(params.timeOut);
+                    request.setReadTimeout(params.timeOut);
                     request.setRetryCount(params.retry);
 
                     if (networkConfig.getHeader() != null) {
@@ -463,6 +466,7 @@ public class RequestManager {
             request.setContentType(params.contentType);
         }
         request.setConnectTimeout(params.timeOut);
+        request.setReadTimeout(params.timeOut);
         request.setRetryCount(params.retry);
         request.setCacheMode(params.cacheMode);
         if (networkConfig.getHeader() != null) {
